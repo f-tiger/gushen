@@ -10,6 +10,7 @@ from __future__ import annotations
 import re
 
 from app.services.ai.client import SYSTEM_GUARDRAILS, ai_available, chat
+from app.services.compliance.guard import sanitize
 from app.services.market import get_provider
 
 _SYMBOL_RE = re.compile(r"\b[A-Z]{1,5}\b")
@@ -45,8 +46,9 @@ def answer(question: str, symbols: list[str] | None = None) -> dict:
         return {
             "source": "no_ai",
             "grounding": grounding,
-            "answer": "AI 未配置（缺 ANTHROPIC_API_KEY）。以下是经行情源取回的相关数据供参考。"
-            "\n以上仅供教育参考，不构成投资建议。",
+            "answer": sanitize(
+                "AI 未配置（缺 ANTHROPIC_API_KEY）。以下是经行情源取回的相关数据供参考。"
+            ),
         }
 
     context = "\n".join(
@@ -60,10 +62,10 @@ def answer(question: str, symbols: list[str] | None = None) -> dict:
     )
     try:
         text = chat(SYSTEM_GUARDRAILS, prompt)
-        return {"source": "ai", "grounding": grounding, "answer": text}
+        return {"source": "ai", "grounding": grounding, "answer": sanitize(text)}
     except Exception:  # noqa: BLE001
         return {
             "source": "error_fallback",
             "grounding": grounding,
-            "answer": "AI 调用失败。以上为经行情源取回的数据。仅供教育参考，不构成投资建议。",
+            "answer": sanitize("AI 调用失败。以上为经行情源取回的数据。"),
         }

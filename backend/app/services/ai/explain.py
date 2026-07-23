@@ -8,6 +8,7 @@ from __future__ import annotations
 import json
 
 from app.services.ai.client import SYSTEM_GUARDRAILS, ai_available, chat
+from app.services.compliance.guard import sanitize
 
 _LEVEL_CN = {
     "conservative": "保守",
@@ -49,7 +50,10 @@ def explain_portfolio(profile: dict, portfolio: dict) -> dict:
     if ai_available():
         try:
             text = chat(SYSTEM_GUARDRAILS, build_prompt(profile, portfolio))
-            return {"source": "ai", "explanation": text}
+            return {"source": "ai", "explanation": sanitize(text)}
         except Exception:  # noqa: BLE001 —— 失败回退，端点不崩
             pass
-    return {"source": "fallback", "explanation": fallback_explanation(profile, portfolio)}
+    return {
+        "source": "fallback",
+        "explanation": sanitize(fallback_explanation(profile, portfolio)),
+    }
