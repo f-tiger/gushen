@@ -21,8 +21,9 @@ class Settings(BaseSettings):
     # 鉴权（⚠️ 生产务必用环境变量覆盖为随机强密钥）
     secret_key: str = "dev-insecure-change-me"
 
-    # 合规姿态：education_only（默认，仅教育/非个性化）| advisory（持牌 RIA 才可开）
-    compliance_mode: str = "education_only"
+    # 合规姿态：personal（个人自用，放宽免责/个性化）| education_only | advisory
+    # 本项目定位为个人自用站，默认 personal。
+    compliance_mode: str = "personal"
 
     # 数据库（默认指向 docker-compose 里的 TimescaleDB）
     database_url: str = "postgresql+psycopg2://gushen:gushen@localhost:5432/gushen"

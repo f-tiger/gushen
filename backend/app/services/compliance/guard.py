@@ -17,19 +17,26 @@ DISCLAIMER = "以上仅供教育参考，不构成投资建议。"
 _PERSONALIZED_MARKERS = ("你应该买", "建议你买入", "立即买入", "马上卖出", "全仓")
 
 
+def is_personal() -> bool:
+    """个人自用模式：放宽——不强制免责声明、不软化个性化措辞。"""
+    return settings.compliance_mode == "personal"
+
+
 def is_education_only() -> bool:
     return settings.compliance_mode == "education_only"
 
 
 def ensure_disclaimer(text: str) -> str:
-    """确保文本以免责声明结尾。"""
-    if DISCLAIMER in text:
+    """确保文本以免责声明结尾（personal 模式下不加）。"""
+    if is_personal() or DISCLAIMER in text:
         return text
     return text.rstrip() + "\n" + DISCLAIMER
 
 
 def sanitize(text: str) -> str:
-    """education_only 模式下软化个性化指令性措辞，并确保免责声明。"""
+    """education_only 模式下软化个性化措辞并加免责；personal 模式原样返回。"""
+    if is_personal():
+        return text
     out = text
     if is_education_only():
         for marker in _PERSONALIZED_MARKERS:
