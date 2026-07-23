@@ -38,6 +38,33 @@ export async function recommend(
   return res.json();
 }
 
+export interface GoalResponse {
+  initial: number;
+  target: number;
+  years: number;
+  required_cagr: number;
+  prob_success: number;
+  verdict: string;
+  projection: { median: number; p5: number; p95: number };
+  message: string;
+  assumptions: { expected_return: number; expected_vol: number };
+}
+
+export async function analyzeGoal(
+  initial: number,
+  target: number,
+  years: number,
+  symbols: string[]
+): Promise<GoalResponse> {
+  const res = await fetch(apiUrl("/api/planning/goal"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ initial, target, years, symbols, method: "hrp" }),
+  });
+  if (!res.ok) throw new Error((await res.json()).detail ?? res.statusText);
+  return res.json();
+}
+
 export async function explainPortfolio(
   profile: RecommendResponse["profile"],
   portfolio: RecommendResponse["portfolio"]

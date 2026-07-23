@@ -1,5 +1,18 @@
 import { useState } from "react";
-import { recommend, explainPortfolio, type RecommendResponse } from "./api";
+import {
+  recommend,
+  explainPortfolio,
+  analyzeGoal,
+  type RecommendResponse,
+  type GoalResponse,
+} from "./api";
+
+const VERDICT_CN: Record<string, { label: string; color: string }> = {
+  realistic: { label: "现实可行", color: "#1a7f37" },
+  aggressive: { label: "偏激进", color: "#9a6700" },
+  very_aggressive: { label: "极激进", color: "#bc4c00" },
+  unrealistic: { label: "不现实", color: "#cf222e" },
+};
 
 const QUESTIONS: { key: string; label: string }[] = [
   { key: "horizon", label: "投资期限（0:<1年 → 3:>10年）" },
@@ -18,6 +31,28 @@ export default function App() {
   const [explanation, setExplanation] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // 目标可行性
+  const [initial, setInitial] = useState(1_000_000);
+  const [target, setTarget] = useState(10_000_000);
+  const [years, setYears] = useState(1);
+  const [goal, setGoal] = useState<GoalResponse | null>(null);
+  const [goalLoading, setGoalLoading] = useState(false);
+  const [goalError, setGoalError] = useState("");
+
+  async function onAnalyzeGoal() {
+    setGoalLoading(true);
+    setGoalError("");
+    setGoal(null);
+    try {
+      const syms = symbols.split(",").map((s) => s.trim()).filter(Boolean);
+      setGoal(await analyzeGoal(initial, target, years, syms));
+    } catch (e) {
+      setGoalError(String(e instanceof Error ? e.message : e));
+    } finally {
+      setGoalLoading(false);
+    }
+  }
 
   async function onSubmit() {
     setLoading(true);
@@ -50,6 +85,50 @@ export default function App() {
         <br />
         <small>⚠️ 仅供教育/信息参考，不构成投资建议。</small>
       </p>
+
+      <div style={{ border: "1px solid #ddd", borderRadius: 8, padding: 16, marginBottom: 24 }}>
+        <h3 style={{ marginTop: 0 }}>目标可行性分析</h3>
+        <p style={{ color: "#666", marginTop: 0 }}>
+          诚实地算出达成目标所需的年化收益与概率——不粉饰。
+        </p>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "flex-end" }}>
+          <label>
+            初始（¥）
+            <br />
+            <input type="number" value={initial} onChange={(e) => setInitial(Number(e.target.value))} style={{ width: 130 }} />
+          </label>
+          <label>
+            目标（¥）
+            <br />
+            <input type="number" value={target} onChange={(e) => setTarget(Number(e.target.value))} style={{ width: 130 }} />
+          </label>
+          <label>
+            年限
+            <br />
+            <input type="number" value={years} onChange={(e) => setYears(Number(e.target.value))} style={{ width: 70 }} />
+          </label>
+          <button onClick={onAnalyzeGoal} disabled={goalLoading} style={{ padding: "8px 16px" }}>
+            {goalLoading ? "分析中…" : "分析可行性"}
+          </button>
+        </div>
+        {goalError && <p style={{ color: "crimson" }}>错误：{goalError}</p>}
+        {goal && (
+          <div style={{ marginTop: 12 }}>
+            <p style={{ fontSize: 18 }}>
+              需要年化 <b>{(goal.required_cagr * 100).toFixed(0)}%</b> · 达成概率{" "}
+              <b>{(goal.prob_success * 100).toFixed(2)}%</b> · 判定{" "}
+              <b style={{ color: VERDICT_CN[goal.verdict]?.color }}>
+                {VERDICT_CN[goal.verdict]?.label ?? goal.verdict}
+              </b>
+            </p>
+            <p style={{ color: "#444" }}>{goal.message}</p>
+            <p style={{ color: "#666", fontSize: 13 }}>
+              1 年后预测区间（基于历史 μ/σ）：中位 ¥{goal.projection.median.toLocaleString()} ·
+              5% 分位 ¥{goal.projection.p5.toLocaleString()} · 95% 分位 ¥{goal.projection.p95.toLocaleString()}
+            </p>
+          </div>
+        )}
+      </div>
 
       <h3>风险问卷</h3>
       {QUESTIONS.map((q) => (
