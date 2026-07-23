@@ -18,7 +18,8 @@ import numpy as np
 import pandas as pd
 
 # 交给确定性算法的方法白名单
-METHODS = ["hrp", "inverse_vol", "min_volatility", "max_sharpe", "equal_weight"]
+# momentum 为进攻型：向强动量标的集中加权（高上行、也高下行）
+METHODS = ["hrp", "inverse_vol", "min_volatility", "max_sharpe", "equal_weight", "momentum"]
 
 TRADING_DAYS = 252
 
@@ -70,6 +71,22 @@ def _equal_weight(prices: pd.DataFrame) -> dict[str, float]:
     return {c: 1 / len(cols) for c in cols}
 
 
+def _momentum(prices: pd.DataFrame, lookback: int = 126, top_k: int = 3) -> dict[str, float]:
+    """进攻型动量集中：只保留动量最强的 top_k 个标的，按正动量加权。
+
+    ⚠️ 高集中 = 高上行也高下行。这是进攻策略，不是稳健配置。
+    """
+    if len(prices) <= lookback:
+        return _equal_weight(prices)
+    mom = prices.iloc[-1] / prices.iloc[-1 - lookback] - 1.0
+    mom = mom.clip(lower=0.0)  # 负动量不配
+    winners = mom.sort_values(ascending=False).head(max(1, min(top_k, prices.shape[1])))
+    total = winners.sum()
+    if total <= 0:
+        return _equal_weight(prices)
+    return {sym: float(winners.get(sym, 0.0) / total) for sym in prices.columns}
+
+
 def _inverse_vol(prices: pd.DataFrame) -> dict[str, float]:
     """逆波动率加权 —— 风险平价的轻量近似，纯 numpy，无需 cvxpy。"""
     returns = prices.pct_change().dropna()
@@ -103,6 +120,8 @@ def optimize(
         raw = _equal_weight(prices)
     elif method == "inverse_vol":
         raw = _inverse_vol(prices)
+    elif method == "momentum":
+        raw = _momentum(prices)
     else:
         raw = _pypfopt_optimize(prices, method, weight_bounds)
 
