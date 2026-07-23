@@ -1,10 +1,51 @@
-"""测试夹具：生成确定性的合成价格数据（无网络、无数据库）。"""
+"""测试夹具。
+
+关键：在导入任何 app 模块之前，把 DATABASE_URL 指向本地 SQLite，
+这样整个测试套件无需 Postgres/psycopg2 即可跑 DB 相关端点。
+"""
 
 from __future__ import annotations
 
-import numpy as np
-import pandas as pd
-import pytest
+import os
+import uuid
+
+# ⚠️ 必须在导入 app.* 之前设置
+os.environ.setdefault("DATABASE_URL", "sqlite:///./_test_gushen.db")
+os.environ.setdefault("SECRET_KEY", "test-secret")
+
+import numpy as np  # noqa: E402
+import pandas as pd  # noqa: E402
+import pytest  # noqa: E402
+from starlette.testclient import TestClient  # noqa: E402
+
+from app.db.base import Base, engine  # noqa: E402
+import app.models  # noqa: E402,F401 —— 注册模型
+from app.main import app  # noqa: E402
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _create_schema():
+    Base.metadata.create_all(bind=engine)
+    yield
+    Base.metadata.drop_all(bind=engine)
+    try:
+        os.remove("./_test_gushen.db")
+    except OSError:
+        pass
+
+
+@pytest.fixture
+def client() -> TestClient:
+    return TestClient(app)
+
+
+@pytest.fixture
+def auth_headers(client: TestClient) -> dict:
+    """注册一个唯一用户并返回带 Bearer 令牌的请求头。"""
+    email = f"user_{uuid.uuid4().hex[:8]}@example.com"
+    resp = client.post("/api/auth/register", json={"email": email, "password": "pw123456"})
+    token = resp.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
 
 
 @pytest.fixture

@@ -18,6 +18,12 @@ class Settings(BaseSettings):
     debug: bool = True
     api_prefix: str = "/api"
 
+    # 鉴权（⚠️ 生产务必用环境变量覆盖为随机强密钥）
+    secret_key: str = "dev-insecure-change-me"
+
+    # 合规姿态：education_only（默认，仅教育/非个性化）| advisory（持牌 RIA 才可开）
+    compliance_mode: str = "education_only"
+
     # 数据库（默认指向 docker-compose 里的 TimescaleDB）
     database_url: str = "postgresql+psycopg2://gushen:gushen@localhost:5432/gushen"
 
