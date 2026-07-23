@@ -36,14 +36,16 @@ jobs:
           npm ci
           npm run build
 
-      - name: Deploy to Cloudflare Pages
-        working-directory: frontend
+      # 确保 Pages 项目存在。continue-on-error 让创建报错（如已存在/权限不足）
+      # 完整显示在日志里，同时不阻断后续部署，便于诊断。
+      # 不设置 CLOUDFLARE_ACCOUNT_ID，让 wrangler 从 API Token 自动识别账户。
+      - name: Ensure Pages project exists
+        continue-on-error: true
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          # 首次部署前确保 Pages 项目存在（已存在则忽略错误）
-          npx --yes wrangler@3 pages project create gushen \
-            --production-branch=main 2>/dev/null || echo "项目已存在或已创建，继续部署"
-          npx --yes wrangler@3 pages deploy dist \
-            --project-name=gushen --branch=main --commit-dirty=true
+        run: npx --yes wrangler@3 pages project create gushen --production-branch=main
+
+      - name: Deploy to Cloudflare Pages
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: npx --yes wrangler@3 pages deploy frontend/dist --project-name=gushen --branch=main --commit-dirty=true
