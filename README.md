@@ -61,15 +61,17 @@ npm run dev                    # http://localhost:5173
 cd backend && source .venv/bin/activate && pytest
 ```
 
-## 已实现（P0–P3 骨架）
+## 已实现（P0–P6 骨架）
 
 - ✅ FastAPI 骨架 + 配置 + ORM 模型（用户/画像/组合/持仓/订单）
 - ✅ 行情抽象层 + yfinance / Finnhub 适配器
 - ✅ **组合优化引擎**：HRP / 逆波动率 / 最小方差 / 最大夏普 / 等权（Ledoit-Wolf 收缩）
 - ✅ 风险画像确定性映射（问卷 → 档位 → 推荐方法）
-- ✅ API：`/market/*`、`/portfolio/optimize`、`/portfolio/recommend`、`/portfolio/risk-profile`
-- ✅ 前端最小页面：问卷 → 画像 → 推荐组合
-- ✅ 优化引擎单元测试（含合成数据验证）
+- ✅ **回测/模拟框架（算法验证器）**：walk-forward 周期再平衡、NAV 曲线、指标、多方法横评
+- ✅ **AI 表达层**：Claude 组合解读 + 工具接地问答（数字经行情源取回；无 key 时确定性回退）
+- ✅ Alembic 迁移脚手架 + dev 建表脚本
+- ✅ 前端最小页面：问卷 → 画像 → 推荐组合 + AI 解读
+- ✅ 单元 + API 测试 29 项（含合成数据验证优化/回测，TestClient 验证路由）
 
 ## 主要 API
 
@@ -82,9 +84,25 @@ cd backend && source .venv/bin/activate && pytest
 | POST | `/api/portfolio/risk-profile` | 问卷 → 风险画像 |
 | POST | `/api/portfolio/optimize` | 指定方法优化组合 |
 | POST | `/api/portfolio/recommend` | 问卷 → 画像 → 推荐组合（一步） |
+| POST | `/api/backtest/compare` | 多方法回测横评（按夏普排序） |
+| POST | `/api/backtest/run` | 单方法回测（NAV + 指标） |
+| GET | `/api/ai/status` | AI 是否可用 |
+| POST | `/api/ai/explain-portfolio` | 组合解读（数字入参，LLM 只表达） |
+| POST | `/api/ai/ask` | 工具接地问答（报价经行情源取回） |
+
+## 数据库迁移
+
+```bash
+cd backend
+# 快速起步（dev）：直接建表
+python -m app.db.init_db
+# 或用 Alembic（DB 可连接后）
+alembic revision --autogenerate -m "init"
+alembic upgrade head
+```
 
 ## 路线图（详见 architecture.md §9）
 
 P0 地基 → P1 行情 → **P2 组合引擎** → **P3 模拟验证** → P4 风险画像 → P5 AI 表达 → P6 再平衡 → P7 真实指导（须先定合规姿态）
 
-当前进度：**P0–P2 骨架 + P4 画像映射已落地**；待补：模拟/回测框架、AI 表达层、再平衡、数据库迁移。
+当前进度：**P0–P5 骨架已落地**（组合引擎、回测验证、画像映射、AI 表达）；待补：P6 再平衡自动化、RAG 向量检索、真实数据库接线与鉴权、P7 合规姿态。

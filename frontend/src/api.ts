@@ -29,3 +29,16 @@ export async function recommend(
   if (!res.ok) throw new Error((await res.json()).detail ?? res.statusText);
   return res.json();
 }
+
+export async function explainPortfolio(
+  profile: RecommendResponse["profile"],
+  portfolio: RecommendResponse["portfolio"]
+): Promise<{ source: string; explanation: string }> {
+  const res = await fetch("/api/ai/explain-portfolio", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ profile, portfolio }),
+  });
+  if (!res.ok) throw new Error((await res.json()).detail ?? res.statusText);
+  return res.json();
+}

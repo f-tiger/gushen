@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { recommend, type RecommendResponse } from "./api";
+import { recommend, explainPortfolio, type RecommendResponse } from "./api";
 
 const QUESTIONS: { key: string; label: string }[] = [
   { key: "horizon", label: "投资期限（0:<1年 → 3:>10年）" },
@@ -15,6 +15,7 @@ export default function App() {
   );
   const [symbols, setSymbols] = useState("SPY,QQQ,GLD,TLT");
   const [result, setResult] = useState<RecommendResponse | null>(null);
+  const [explanation, setExplanation] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -22,9 +23,18 @@ export default function App() {
     setLoading(true);
     setError("");
     setResult(null);
+    setExplanation("");
     try {
       const syms = symbols.split(",").map((s) => s.trim()).filter(Boolean);
-      setResult(await recommend(answers, syms));
+      const rec = await recommend(answers, syms);
+      setResult(rec);
+      // 拿到组合后请求 AI 解读（无 key 时后端返回确定性回退文本）
+      try {
+        const exp = await explainPortfolio(rec.profile, rec.portfolio);
+        setExplanation(exp.explanation);
+      } catch {
+        /* 解读失败不影响主流程 */
+      }
     } catch (e) {
       setError(String(e instanceof Error ? e.message : e));
     } finally {
@@ -99,6 +109,15 @@ export default function App() {
             <br />
             <small>历史数据估算，非未来预测。</small>
           </p>
+
+          {explanation && (
+            <div style={{ marginTop: 16 }}>
+              <h3>AI 解读</h3>
+              <p style={{ whiteSpace: "pre-wrap", background: "#f6f6f6", padding: 12, borderRadius: 6 }}>
+                {explanation}
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>
