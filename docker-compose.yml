@@ -1,0 +1,43 @@
+# Gushen 本地开发编排：TimescaleDB(+pgvector) + Redis + 后端
+# 起步用单个 PostgreSQL 承载关系型 + 时序 + 向量（见 docs/architecture.md §2）
+services:
+  db:
+    # TimescaleDB + pgvector 一体镜像，一库满足三类存储需求
+    image: timescale/timescaledb-ha:pg16
+    environment:
+      POSTGRES_USER: gushen
+      POSTGRES_PASSWORD: gushen
+      POSTGRES_DB: gushen
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/home/postgres/pgdata/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gushen"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg2://gushen:gushen@db:5432/gushen
+      REDIS_URL: redis://redis:6379/0
+      MARKET_DATA_PROVIDER: ${MARKET_DATA_PROVIDER:-yfinance}
+      FINNHUB_API_KEY: ${FINNHUB_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+volumes:
+  db_data:
