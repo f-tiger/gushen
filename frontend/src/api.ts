@@ -8,6 +8,65 @@ function apiUrl(path: string): string {
   return `${API_BASE}${path}`;
 }
 
+async function postJson<T>(path: string, body: unknown): Promise<T> {
+  const res = await fetch(apiUrl(path), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error((await res.json()).detail ?? res.statusText);
+  return res.json();
+}
+
+// ---- 进攻工具 ----
+
+export interface ScreenCandidate {
+  symbol: string;
+  score: number;
+  momentum: { "3m": number | null; "6m": number | null; "12m": number | null };
+  near_52w_high: number;
+  breakout: boolean;
+  trend: string;
+  risk: { annualized_vol: number; max_drawdown: number };
+}
+
+export function screenStocks(
+  symbols: string[],
+  mode: "momentum" | "multibagger"
+): Promise<{ mode: string; candidates: ScreenCandidate[]; note: string }> {
+  return postJson("/api/analysis/screen", { symbols, mode, top_k: 10 });
+}
+
+export interface KellyResponse {
+  full_kelly: number;
+  fractional_kelly: number;
+  capped_fraction: number;
+  recommended_amount: number;
+  note: string;
+}
+
+export function kellySize(
+  bankroll: number,
+  win_prob: number,
+  win_multiple: number
+): Promise<KellyResponse> {
+  return postJson("/api/planning/kelly", { bankroll, win_prob, win_multiple });
+}
+
+export interface BarbellResponse {
+  weights: Record<string, number>;
+  safe_pct: number;
+  note?: string;
+}
+
+export function buildBarbell(
+  core_symbols: string[],
+  satellite_symbols: string[],
+  safe_pct: number
+): Promise<BarbellResponse> {
+  return postJson("/api/portfolios/barbell", { core_symbols, satellite_symbols, safe_pct });
+}
+
 export interface RecommendResponse {
   profile: {
     score: number;

@@ -6,6 +6,30 @@ import {
   type RecommendResponse,
   type GoalResponse,
 } from "./api";
+import AggressiveTools from "./AggressiveTools";
+
+type Tab = "advisor" | "aggressive";
+
+function TabBar({ tab, setTab }: { tab: Tab; setTab: (t: Tab) => void }) {
+  const btn = (t: Tab, label: string) => (
+    <button
+      onClick={() => setTab(t)}
+      style={{
+        padding: "6px 14px", marginRight: 8, cursor: "pointer",
+        borderRadius: 6, border: "1px solid #ccc",
+        background: tab === t ? "#222" : "#fff", color: tab === t ? "#fff" : "#222",
+      }}
+    >
+      {label}
+    </button>
+  );
+  return (
+    <div style={{ margin: "12px 0 20px" }}>
+      {btn("advisor", "智能投顾")}
+      {btn("aggressive", "进攻工具")}
+    </div>
+  );
+}
 
 const VERDICT_CN: Record<string, { label: string; color: string }> = {
   realistic: { label: "现实可行", color: "#1a7f37" },
@@ -31,6 +55,8 @@ export default function App() {
   const [explanation, setExplanation] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const [tab, setTab] = useState<Tab>("advisor");
 
   // 目标可行性
   const [initial, setInitial] = useState(1_000_000);
@@ -77,9 +103,20 @@ export default function App() {
     }
   }
 
+  if (tab === "aggressive") {
+    return (
+      <div style={{ maxWidth: 640, margin: "40px auto", fontFamily: "system-ui", padding: 16 }}>
+        <h1>股神 · 进攻工具</h1>
+        <TabBar tab={tab} setTab={setTab} />
+        <AggressiveTools />
+      </div>
+    );
+  }
+
   return (
     <div style={{ maxWidth: 640, margin: "40px auto", fontFamily: "system-ui", padding: 16 }}>
       <h1>股神 · AI 智能投顾</h1>
+      <TabBar tab={tab} setTab={setTab} />
       <p style={{ color: "#666" }}>
         回答风险问卷 → 生成风险画像 → 用推荐算法构建组合。
         <br />
