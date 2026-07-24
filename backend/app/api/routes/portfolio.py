@@ -9,6 +9,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from app.services.market import get_provider
+from app.services.portfolio.barbell import build_barbell
 from app.services.portfolio.optimizer import METHODS, optimize
 from app.services.profiling.risk_profile import score_answers
 
@@ -74,6 +75,34 @@ def optimize_portfolio(req: OptimizeRequest) -> dict:
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(status_code=400, detail=f"优化失败: {exc}") from exc
     return result.to_dict()
+
+
+class BarbellRequest(BaseModel):
+    core_symbols: list[str] = Field(..., min_length=2, examples=[["SPY", "TLT", "GLD"]])
+    satellite_symbols: list[str] = Field(..., min_length=1, examples=[["NVDA", "SMCI"]])
+    safe_pct: float = Field(0.80, gt=0, lt=1)
+    per_bet_cap: float = Field(0.10, gt=0, le=1)
+    lookback_days: int = Field(365, ge=60, le=3650)
+
+
+@router.post("/barbell")
+def barbell(req: BarbellRequest) -> dict:
+    """杠铃组合：保命核心 + 定义化风险的进攻 sleeve（docs/research-high-return.md §5）。"""
+    core = _load_prices(req.core_symbols, req.lookback_days)
+    # 进攻端可能只有 1 个标的；用等权/动量前先构造 DataFrame
+    sat = _load_prices(req.satellite_symbols, req.lookback_days) if len(req.satellite_symbols) >= 2 else None
+    if sat is None:
+        # 单标的进攻端：直接全给该标的
+        sym = req.satellite_symbols[0].upper()
+        core_w = optimize(core, "min_volatility").weights
+        weights = {s: round(w * req.safe_pct, 4) for s, w in core_w.items()}
+        weights[sym] = round(weights.get(sym, 0) + (1 - req.safe_pct), 4)
+        return {"weights": weights, "safe_pct": req.safe_pct,
+                "note": "单标的进攻端；其余为保命核心。归零不致命。"}
+    try:
+        return build_barbell(core, sat, req.safe_pct, per_bet_cap=req.per_bet_cap)
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=400, detail=f"杠铃构造失败: {exc}") from exc
 
 
 @router.post("/recommend")

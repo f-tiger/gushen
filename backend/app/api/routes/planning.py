@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 from app.api.routes.portfolio import _load_prices
 from app.services.backtest.engine import backtest
 from app.services.planning.goal import analyze_goal
+from app.services.planning.kelly import size_bet
 
 router = APIRouter(prefix="/planning", tags=["planning"])
 
@@ -43,3 +44,19 @@ def goal(req: GoalRequest) -> dict:
         "assumptions": {"expected_return": round(exp_ret, 4),
                         "expected_vol": round(exp_vol, 4)},
     }
+
+
+class KellyRequest(BaseModel):
+    bankroll: float = Field(..., gt=0, examples=[1_000_000])
+    win_prob: float = Field(..., gt=0, lt=1, examples=[0.15])
+    win_multiple: float = Field(..., gt=1, examples=[10])
+    loss_fraction: float = Field(1.0, gt=0, le=1)
+    kelly_scale: float = Field(0.25, gt=0, le=1)
+    cap: float = Field(0.10, gt=0, le=1)
+
+
+@router.post("/kelly")
+def kelly(req: KellyRequest) -> dict:
+    """分数凯利仓位：博高倍时该押多少才不被打死。"""
+    return size_bet(req.bankroll, req.win_prob, req.win_multiple,
+                    req.loss_fraction, req.kelly_scale, req.cap).to_dict()

@@ -55,11 +55,12 @@ class ScreenRequest(BaseModel):
     symbols: list[str] = Field(..., min_length=1)
     top_k: int = Field(10, ge=1, le=50)
     history_days: int = Field(400, ge=130, le=3650)
+    mode: str = Field("momentum", pattern="^(momentum|multibagger)$")
 
 
 @router.post("/screen")
 def screen_growth(req: ScreenRequest) -> dict:
-    """进攻型成长筛选：按动量/突破/创新高排名，附下行风险。"""
+    """进攻型成长筛选。mode=momentum 追强势；mode=multibagger 猎多倍股（反转 near-high）。"""
     price_map = {}
     for sym in req.symbols:
         try:
@@ -68,8 +69,12 @@ def screen_growth(req: ScreenRequest) -> dict:
             continue
     if not price_map:
         raise HTTPException(status_code=502, detail="无可用行情数据")
-    candidates = screen(price_map, req.top_k)
-    return {
-        "candidates": [c.to_dict() for c in candidates],
-        "note": "评分刻画当前上行强度，非预测；高分通常高波动。集中押注上行大、下行也大。",
-    }
+    candidates = screen(price_map, req.top_k, req.mode)
+    note = (
+        "multibagger 模式：基于 464 只 10 倍股实证，奖励远离高点、弱化短动量；"
+        "最强因子 FCF yield 待接入基本面数据。"
+        if req.mode == "multibagger"
+        else "momentum 模式：追当前上行强度，非预测；高分通常高波动。"
+    )
+    return {"mode": req.mode, "candidates": [c.to_dict() for c in candidates],
+            "note": note + " 集中押注上行大、下行也大。"}
