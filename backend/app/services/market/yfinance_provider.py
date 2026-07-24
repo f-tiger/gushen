@@ -57,3 +57,17 @@ class YFinanceProvider(MarketDataProvider):
         hist = ticker.history(period="1d")
         price = float(hist["Close"].iloc[-1]) if not hist.empty else 0.0
         return Quote(symbol=symbol, price=price, delayed=True)
+
+    def get_fundamentals(self, symbol: str) -> dict | None:
+        import yfinance as yf
+
+        try:
+            info = yf.Ticker(symbol).info
+            fcf = info.get("freeCashflow")
+            mcap = info.get("marketCap")
+            if not fcf or not mcap:
+                return None
+            return {"fcf": float(fcf), "market_cap": float(mcap),
+                    "fcf_yield": float(fcf) / float(mcap)}
+        except Exception:  # noqa: BLE001
+            return None

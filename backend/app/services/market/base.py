@@ -50,3 +50,11 @@ class MarketDataProvider(ABC):
     def get_news(self, symbol: str) -> list[dict]:
         """相关新闻（可选实现）。"""
         return []
+
+    def get_fundamentals(self, symbol: str) -> dict | None:
+        """基本面（可选实现）：返回 {fcf, market_cap, fcf_yield} 或 None。
+
+        FCF yield = 自由现金流 / 市值，是多倍股最强预测因子
+        （docs/research-high-return.md §3）。默认不实现。
+        """
+        return None

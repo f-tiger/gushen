@@ -69,12 +69,28 @@ def screen_growth(req: ScreenRequest) -> dict:
             continue
     if not price_map:
         raise HTTPException(status_code=502, detail="无可用行情数据")
-    candidates = screen(price_map, req.top_k, req.mode)
-    note = (
-        "multibagger 模式：基于 464 只 10 倍股实证，奖励远离高点、弱化短动量；"
-        "最强因子 FCF yield 待接入基本面数据。"
-        if req.mode == "multibagger"
-        else "momentum 模式：追当前上行强度，非预测；高分通常高波动。"
-    )
+
+    # multibagger 模式：尽力取回 FCF yield（最强因子），失败则退回纯价格评分
+    fcf_map: dict[str, float] = {}
+    fcf_hit = 0
+    if req.mode == "multibagger":
+        provider = get_provider()
+        for sym in price_map:
+            try:
+                f = provider.get_fundamentals(sym)
+                if f and f.get("fcf_yield") is not None:
+                    fcf_map[sym] = f["fcf_yield"]
+                    fcf_hit += 1
+            except Exception:  # noqa: BLE001
+                continue
+
+    candidates = screen(price_map, req.top_k, req.mode, fcf_map or None)
+    if req.mode == "multibagger":
+        note = (
+            f"multibagger 模式：基于 464 只 10 倍股实证，奖励远离高点、弱化短动量；"
+            f"已融合 FCF yield（{fcf_hit}/{len(price_map)} 只取到基本面）。"
+        )
+    else:
+        note = "momentum 模式：追当前上行强度，非预测；高分通常高波动。"
     return {"mode": req.mode, "candidates": [c.to_dict() for c in candidates],
             "note": note + " 集中押注上行大、下行也大。"}

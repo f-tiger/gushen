@@ -60,3 +60,18 @@ class FinnhubProvider(MarketDataProvider):
         return client.company_news(
             symbol, _from=frm.isoformat(), to=today.isoformat()
         )[:20]
+
+    def get_fundamentals(self, symbol: str) -> dict | None:
+        try:
+            client = self._client()
+            data = client.company_basic_financials(symbol, "all")
+            metric = data.get("metric", {}) if data else {}
+            fcf = metric.get("freeCashFlowTTM") or metric.get("freeCashFlowAnnual")
+            mcap = metric.get("marketCapitalization")  # 单位：百万美元
+            if not fcf or not mcap:
+                return None
+            market_cap = float(mcap) * 1_000_000
+            return {"fcf": float(fcf), "market_cap": market_cap,
+                    "fcf_yield": float(fcf) / market_cap}
+        except Exception:  # noqa: BLE001
+            return None

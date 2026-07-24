@@ -79,6 +79,24 @@ def test_growth_and_multibagger_differ():
     assert growth_score(s) != multibagger_score(s)
 
 
+def test_fcf_yield_boosts_multibagger_score():
+    # 同一价格序列，高 FCF yield 应显著抬高多倍股评分（最强因子）
+    s = _pulled_back_series()
+    high_fcf = multibagger_score(s, fcf_yield=0.10)
+    low_fcf = multibagger_score(s, fcf_yield=-0.05)
+    assert high_fcf > low_fcf
+
+
+def test_screen_multibagger_uses_fcf_map():
+    a = _pulled_back_series(seed=11)
+    b = _pulled_back_series(seed=12)
+    price_map = {"HIGHFCF": a, "LOWFCF": b}
+    # 给 HIGHFCF 明显更高的 FCF yield，应排到前面
+    ranked = screen(price_map, mode="multibagger",
+                    fcf_yield_map={"HIGHFCF": 0.12, "LOWFCF": -0.05})
+    assert ranked[0].symbol == "HIGHFCF"
+
+
 # ---------- 杠铃 ----------
 
 @pytest.fixture
