@@ -1,9 +1,11 @@
 name: Deploy frontend to Cloudflare Pages
 
-# 前端静态站部署到 Cloudflare Pages。
-# 需在仓库 Secrets 配置：CLOUDFLARE_API_TOKEN、CLOUDFLARE_ACCOUNT_ID
-# （可选）Variables 配置 VITE_API_BASE_URL 指向已部署的后端地址。
-# 注意：本项目后端是 Python 科学计算栈，Cloudflare Workers 无法运行，需另行托管。
+# 纯前端版（2026-09-27 重构）：没有后端。行情数据在这里现抓，随站发布为 /data/prices.json。
+#   · push：代码变更即部署；
+#   · schedule：每个美股交易日收盘后（UTC 22:20，周一至周五）重建数据并重新部署；
+#   · 抓取失败的标的沿用线上上一版并在页面标注；失败超过 20% 或拿不到任何数据 → 本次不部署，线上保持原样。
+# 需在仓库 Secrets 配置：CLOUDFLARE_API_TOKEN（CLOUDFLARE_ACCOUNT_ID 可选，wrangler 会从 token 识别）。
+# 成本：每次约 2–3 分钟 × 每月约 22 次定时 ≈ 60 分钟/月。
 
 on:
   push:
@@ -12,8 +14,15 @@ on:
       - main
     paths:
       - "frontend/**"
+      - "scripts/**"
       - ".github/workflows/deploy-frontend.yml"
+  schedule:
+    - cron: "20 22 * * 1-5"
   workflow_dispatch:
+
+concurrency:
+  group: deploy-frontend
+  cancel-in-progress: true
 
 jobs:
   deploy:
@@ -21,6 +30,8 @@ jobs:
     permissions:
       contents: read
       deployments: write
+    env:
+      SITE: https://gushen-4g2.pages.dev
     steps:
       - uses: actions/checkout@v4
 
@@ -28,17 +39,38 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Install & build
+      - name: Install
         working-directory: frontend
-        env:
-          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
-        run: |
-          npm ci
-          npm run build
+        run: npm ci
 
-      # 确保 Pages 项目存在。continue-on-error 让创建报错（如已存在/权限不足）
-      # 完整显示在日志里，同时不阻断后续部署，便于诊断。
-      # 不设置 CLOUDFLARE_ACCOUNT_ID，让 wrangler 从 API Token 自动识别账户。
+      # 前端引擎与后端 Python 原版的逐项对照（基准由 scripts/crosscheck/make_fixture.py 生成）
+      - name: Test engine against the Python reference
+        working-directory: frontend
+        run: npm test
+
+      - name: Build price data (Yahoo adjusted closes)
+        env:
+          PREV_URL: ${{ env.SITE }}/data/prices.json
+        run: node scripts/build-prices.mjs
+
+      - name: Sanity-check the data before publishing
+        run: |
+          python3 - <<'PY'
+          import json, datetime
+          d = json.load(open("frontend/public/data/prices.json"))
+          n = len(d["close"]); days = len(d["dates"])
+          age = (datetime.date.today() - datetime.date.fromisoformat(d["asOf"])).days
+          print(f"{n} symbols, {days} trading days, asOf {d['asOf']} ({age} days old), stale={d.get('stale')}")
+          assert n >= 20, "too few symbols"
+          assert days >= 700, "history too short for the 1095-day goal window"
+          assert age <= 7, "data older than a week"
+          assert all(len(v) == days for v in d["close"].values()), "ragged columns"
+          PY
+
+      - name: Build site
+        working-directory: frontend
+        run: npm run build
+
       - name: Ensure Pages project exists
         continue-on-error: true
         env:
@@ -49,3 +81,15 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: npx --yes wrangler@3 pages deploy frontend/dist --project-name=gushen --branch=main --commit-dirty=true
+
+      # 部署后自检：线上的数据文件就是刚才构建的这一份，首页能打开（传播有延迟，重试）
+      - name: Post-deploy check
+        run: |
+          want=$(python3 -c "import json;print(json.load(open('frontend/public/data/prices.json'))['generated'])")
+          for i in 1 2 3 4 5 6 7 8; do
+            got=$(curl -s --max-time 20 "$SITE/data/prices.json" | python3 -c "import sys,json;print(json.load(sys.stdin).get('generated',''))" 2>/dev/null || true)
+            home=$(curl -s -o /dev/null -w "%{http_code}" --max-time 20 "$SITE/")
+            if [ "$got" = "$want" ] && [ "$home" = 200 ]; then echo "live: data generated $got"; exit 0; fi
+            echo "waiting ($i): live=$got home=$home"; sleep 15
+          done
+          echo "::error::live site does not serve the data just built"; exit 1

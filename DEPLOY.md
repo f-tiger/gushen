@@ -1,5 +1,13 @@
 # 部署说明
 
+> **2026-09-27 起为纯前端版**：只部署 `frontend/` 到 Cloudflare Pages，由 `.github/workflows/deploy-frontend.yml`
+> 完成（测试 → 抓行情 → 数据体检 → 构建 → 部署 → 线上自检；另每个交易日收盘后定时跑一次刷新数据）。
+> 只需要仓库 Secret `CLOUDFLARE_API_TOKEN`，**不再需要 `VITE_API_BASE_URL`，也不需要托管后端**。
+> 改标的池：编辑 `scripts/universe.json` 并推送。下文是旧的「前端 + Python 后端」部署说明，保留备查。
+
+---
+
+
 本项目是**前端静态站 + Python 后端**的组合。两者部署方式不同——请先读「架构现实」。
 
 ## 架构现实（重要）

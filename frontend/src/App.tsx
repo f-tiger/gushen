@@ -7,6 +7,7 @@ import {
   type GoalResponse,
 } from "./api";
 import AggressiveTools from "./AggressiveTools";
+import DataFooter from "./DataFooter";
 
 type Tab = "advisor" | "aggressive";
 
@@ -89,7 +90,7 @@ export default function App() {
       const syms = symbols.split(",").map((s) => s.trim()).filter(Boolean);
       const rec = await recommend(answers, syms);
       setResult(rec);
-      // 拿到组合后请求 AI 解读（无 key 时后端返回确定性回退文本）
+      // 组合解读：纯前端版固定用确定性模板（不调用任何大模型）
       try {
         const exp = await explainPortfolio(rec.profile, rec.portfolio);
         setExplanation(exp.explanation);
@@ -109,6 +110,7 @@ export default function App() {
         <h1>股神 · 进攻工具</h1>
         <TabBar tab={tab} setTab={setTab} />
         <AggressiveTools />
+        <DataFooter />
       </div>
     );
   }
@@ -160,7 +162,7 @@ export default function App() {
             </p>
             <p style={{ color: "#444" }}>{goal.message}</p>
             <p style={{ color: "#666", fontSize: 13 }}>
-              1 年后预测区间（基于历史 μ/σ）：中位 ¥{goal.projection.median.toLocaleString()} ·
+              {goal.years} 年后预测区间（基于该标的池 HRP 回测的历史 μ/σ）：中位 ¥{goal.projection.median.toLocaleString()} ·
               5% 分位 ¥{goal.projection.p5.toLocaleString()} · 95% 分位 ¥{goal.projection.p95.toLocaleString()}
             </p>
           </div>
@@ -207,6 +209,9 @@ export default function App() {
             <b>{result.profile.recommended_method}</b> · 目标期限{" "}
             {result.profile.target_horizon_years} 年
           </p>
+          {result.skipped && result.skipped.length > 0 && (
+            <p style={{ color: "#9a6700" }}>数据集里没有、已跳过：{result.skipped.join(", ")}</p>
+          )}
           <h3>推荐组合（{result.portfolio.method}）</h3>
           <table style={{ borderCollapse: "collapse", width: "100%" }}>
             <tbody>
@@ -228,7 +233,7 @@ export default function App() {
 
           {explanation && (
             <div style={{ marginTop: 16 }}>
-              <h3>AI 解读</h3>
+              <h3>组合解读（模板生成）</h3>
               <p style={{ whiteSpace: "pre-wrap", background: "#f6f6f6", padding: 12, borderRadius: 6 }}>
                 {explanation}
               </p>
@@ -236,6 +241,7 @@ export default function App() {
           )}
         </div>
       )}
+      <DataFooter />
     </div>
   );
 }

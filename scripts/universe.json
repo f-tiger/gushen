@@ -1,0 +1,5 @@
+{
+ "_note": "纯前端版的可选标的池。改这里就行，下次部署自动抓取；代码用 Yahoo 格式（BRK-B 而不是 BRK.B）。",
+ "etf": ["SPY", "QQQ", "IWM", "DIA", "VTI", "VEA", "VWO", "EFA", "AGG", "BND", "TLT", "IEF", "SHY", "LQD", "HYG", "TIP", "GLD", "SLV", "DBC", "VNQ", "XLK", "XLF", "XLE", "XLV", "XLY", "XLP", "XLI", "XLU", "SMH", "SOXX", "ARKK"],
+ "stock": ["AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "META", "TSLA", "AVGO", "AMD", "MU", "MRVL", "SMCI", "PLTR", "ORCL", "CRM", "ADBE", "NFLX", "TSM", "ASML", "INTC", "QCOM", "TXN", "ARM", "COIN", "MSTR", "BRK-B", "JPM", "V", "MA", "UNH", "LLY", "XOM", "COST", "WMT", "KO", "PG", "JNJ"]
+}

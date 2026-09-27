@@ -1,0 +1,1313 @@
+{
+ "optimize": [
+  {
+   "symbols": [
+    "AAA",
+    "BBB",
+    "CCC",
+    "DDD",
+    "EEE"
+   ],
+   "days": 365,
+   "bounds": [
+    0.0,
+    1.0
+   ],
+   "method": "equal_weight",
+   "result": {
+    "method": "equal_weight",
+    "weights": {
+     "AAA": 0.2,
+     "BBB": 0.2,
+     "CCC": 0.2,
+     "DDD": 0.2,
+     "EEE": 0.2
+    },
+    "expected_annual_return": 0.1918,
+    "annual_volatility": 0.1282,
+    "sharpe_ratio": 1.4965
+   }
+  },
+  {
+   "symbols": [
+    "AAA",
+    "CCC",
+    "DDD",
+    "GGG",
+    "HHH",
+    "JJJ"
+   ],
+   "days": 730,
+   "bounds": [
+    0.0,
+    0.35
+   ],
+   "method": "equal_weight",
+   "result": {
+    "method": "equal_weight",
+    "weights": {
+     "AAA": 0.1667,
+     "CCC": 0.1667,
+     "DDD": 0.1667,
+     "GGG": 0.1667,
+     "HHH": 0.1667,
+     "JJJ": 0.1667
+    },
+    "expected_annual_return": 0.0628,
+    "annual_volatility": 0.1224,
+    "sharpe_ratio": 0.513
+   }
+  },
+  {
+   "symbols": [
+    "AAA",
+    "BBB",
+    "CCC",
+    "DDD",
+    "EEE"
+   ],
+   "days": 365,
+   "bounds": [
+    0.0,
+    1.0
+   ],
+   "method": "inverse_vol",
+   "result": {
+    "method": "inverse_vol",
+    "weights": {
+     "AAA": 0.1584,
+     "BBB": 0.0998,
+     "CCC": 0.4174,
+     "DDD": 0.2716,
+     "EEE": 0.0527
+    },
+    "expected_annual_return": 0.1098,
+    "annual_volatility": 0.0607,
+    "sharpe_ratio": 1.8081
+   }
+  },
+  {
+   "symbols": [
+    "AAA",
+    "CCC",
+    "DDD",
+    "GGG",
+    "HHH",
+    "JJJ"
+   ],
+   "days": 730,
+   "bounds": [
+    0.0,
+    0.35
+   ],
+   "method": "inverse_vol",
+   "result": {
+    "method": "inverse_vol",
+    "weights": {
+     "AAA": 0.155,
+     "CCC": 0.3983,
+     "DDD": 0.2489,
+     "GGG": 0.0733,
+     "HHH": 0.0775,
+     "JJJ": 0.0471
+    },
+    "expected_annual_return": 0.0628,
+    "annual_volatility": 0.059,
+    "sharpe_ratio": 1.0657
+   }
+  },
+  {
+   "symbols": [
+    "AAA",
+    "BBB",
+    "CCC",
+    "DDD",
+    "EEE"
+   ],
+   "days": 365,
+   "bounds": [
+    0.0,
+    1.0
+   ],
+   "method": "momentum",
+   "result": {
+    "method": "momentum",
+    "weights": {
+     "CCC": 0.055,
+     "DDD": 0.2414,
+     "EEE": 0.7037
+    },
+    "expected_annual_return": 0.5511,
+    "annual_volatility": 0.3345,
+    "sharpe_ratio": 1.6476
+   }
+  },
+  {
+   "symbols": [
+    "AAA",
+    "CCC",
+    "DDD",
+    "GGG",
+    "HHH",
+    "JJJ"
+   ],
+   "days": 730,
+   "bounds": [
+    0.0,
+    0.35
+   ],
+   "method": "momentum",
+   "result": {
+    "method": "momentum",
+    "weights": {
+     "DDD": 0.1849,
+     "HHH": 0.4123,
+     "JJJ": 0.4027
+    },
+    "expected_annual_return": 0.0433,
+    "annual_volatility": 0.2444,
+    "sharpe_ratio": 0.1773
+   }
+  },
+  {
+   "symbols": [
+    "AAA",
+    "BBB",
+    "CCC",
+    "DDD",
+    "EEE"
+   ],
+   "days": 365,
+   "bounds": [
+    0.0,
+    1.0
+   ],
+   "method": "hrp",
+   "result": {
+    "method": "hrp",
+    "weights": {
+     "AAA": 0.0635,
+     "BBB": 0.0252,
+     "CCC": 0.634,
+     "DDD": 0.2685,
+     "EEE": 0.0088
+    },
+    "expected_annual_return": 0.0946,
+    "annual_volatility": 0.045,
+    "sharpe_ratio": 2.0992
+   }
+  },
+  {
+   "symbols": [
+    "AAA",
+    "CCC",
+    "DDD",
+    "GGG",
+    "HHH",
+    "JJJ"
+   ],
+   "days": 730,
+   "bounds": [
+    0.0,
+    0.35
+   ],
+   "method": "hrp",
+   "result": {
+    "method": "hrp",
+    "weights": {
+     "AAA": 0.074,
+     "CCC": 0.6303,
+     "DDD": 0.2495,
+     "GGG": 0.0186,
+     "HHH": 0.0185,
+     "JJJ": 0.0089
+    },
+    "expected_annual_return": 0.0537,
+    "annual_volatility": 0.0441,
+    "sharpe_ratio": 1.2177
+   }
+  },
+  {
+   "symbols": [
+    "AAA",
+    "BBB",
+    "CCC",
+    "DDD",
+    "EEE"
+   ],
+   "days": 365,
+   "bounds": [
+    0.0,
+    1.0
+   ],
+   "method": "min_volatility",
+   "result": {
+    "method": "min_volatility",
+    "weights": {
+     "AAA": 0.1167,
+     "BBB": 0.0247,
+     "CCC": 0.6032,
+     "DDD": 0.2523,
+     "EEE": 0.0032
+    },
+    "expected_annual_return": 0.0895,
+    "annual_volatility": 0.0446,
+    "sharpe_ratio": 2.0075
+   }
+  },
+  {
+   "symbols": [
+    "AAA",
+    "CCC",
+    "DDD",
+    "GGG",
+    "HHH",
+    "JJJ"
+   ],
+   "days": 730,
+   "bounds": [
+    0.0,
+    0.35
+   ],
+   "method": "min_volatility",
+   "result": {
+    "method": "min_volatility",
+    "weights": {
+     "AAA": 0.2078,
+     "CCC": 0.35,
+     "DDD": 0.35,
+     "GGG": 0.0405,
+     "HHH": 0.0329,
+     "JJJ": 0.0188
+    },
+    "expected_annual_return": 0.0692,
+    "annual_volatility": 0.0541,
+    "sharpe_ratio": 1.28
+   }
+  },
+  {
+   "symbols": [
+    "AAA",
+    "BBB",
+    "CCC",
+    "DDD",
+    "EEE"
+   ],
+   "days": 365,
+   "bounds": [
+    0.0,
+    1.0
+   ],
+   "method": "max_sharpe",
+   "result": {
+    "method": "max_sharpe",
+    "weights": {
+     "AAA": 0.0384,
+     "CCC": 0.6775,
+     "DDD": 0.1751,
+     "EEE": 0.109
+    },
+    "expected_annual_return": 0.1654,
+    "annual_volatility": 0.0658,
+    "sharpe_ratio": 2.5133
+   }
+  },
+  {
+   "symbols": [
+    "AAA",
+    "CCC",
+    "DDD",
+    "GGG",
+    "HHH",
+    "JJJ"
+   ],
+   "days": 730,
+   "bounds": [
+    0.0,
+    0.35
+   ],
+   "method": "max_sharpe",
+   "result": {
+    "method": "max_sharpe",
+    "weights": {
+     "AAA": 0.2596,
+     "CCC": 0.35,
+     "DDD": 0.35,
+     "GGG": 0.0262,
+     "HHH": 0.0143
+    },
+    "expected_annual_return": 0.0714,
+    "annual_volatility": 0.0554,
+    "sharpe_ratio": 1.2896
+   }
+  }
+ ],
+ "recommend": [
+  {
+   "answers": {
+    "horizon": 0,
+    "drawdown_tolerance": 0,
+    "experience": 0,
+    "income_stability": 1,
+    "goal": 0
+   },
+   "symbols": [
+    "AAA",
+    "BBB",
+    "CCC",
+    "DDD",
+    "EEE",
+    "GGG"
+   ],
+   "profile": {
+    "score": 7,
+    "level": "conservative",
+    "recommended_method": "min_volatility",
+    "max_weight": 0.2,
+    "target_horizon_years": 1
+   },
+   "portfolio": {
+    "method": "min_volatility",
+    "weights": {
+     "AAA": 0.2,
+     "BBB": 0.2,
+     "CCC": 0.2,
+     "DDD": 0.2,
+     "EEE": 0.0464,
+     "GGG": 0.1535
+    },
+    "expected_annual_return": 0.0813,
+    "annual_volatility": 0.0945,
+    "sharpe_ratio": 0.8609
+   }
+  },
+  {
+   "answers": {
+    "horizon": 1,
+    "drawdown_tolerance": 1,
+    "experience": 1,
+    "income_stability": 1,
+    "goal": 1
+   },
+   "symbols": [
+    "AAA",
+    "BBB",
+    "CCC",
+    "DDD",
+    "EEE",
+    "GGG"
+   ],
+   "profile": {
+    "score": 33,
+    "level": "moderate_conservative",
+    "recommended_method": "hrp",
+    "max_weight": 0.25,
+    "target_horizon_years": 3
+   },
+   "portfolio": {
+    "method": "hrp",
+    "weights": {
+     "AAA": 0.0597,
+     "BBB": 0.0237,
+     "CCC": 0.6271,
+     "DDD": 0.2595,
+     "EEE": 0.0083,
+     "GGG": 0.0218
+    },
+    "expected_annual_return": 0.0932,
+    "annual_volatility": 0.0439,
+    "sharpe_ratio": 2.1212
+   }
+  },
+  {
+   "answers": {
+    "horizon": 2,
+    "drawdown_tolerance": 2,
+    "experience": 1,
+    "income_stability": 2,
+    "goal": 1
+   },
+   "symbols": [
+    "AAA",
+    "BBB",
+    "CCC",
+    "DDD",
+    "EEE",
+    "GGG"
+   ],
+   "profile": {
+    "score": 53,
+    "level": "moderate",
+    "recommended_method": "hrp",
+    "max_weight": 0.3,
+    "target_horizon_years": 7
+   },
+   "portfolio": {
+    "method": "hrp",
+    "weights": {
+     "AAA": 0.0597,
+     "BBB": 0.0237,
+     "CCC": 0.6271,
+     "DDD": 0.2595,
+     "EEE": 0.0083,
+     "GGG": 0.0218
+    },
+    "expected_annual_return": 0.0932,
+    "annual_volatility": 0.0439,
+    "sharpe_ratio": 2.1212
+   }
+  },
+  {
+   "answers": {
+    "horizon": 3,
+    "drawdown_tolerance": 2,
+    "experience": 2,
+    "income_stability": 2,
+    "goal": 3
+   },
+   "symbols": [
+    "AAA",
+    "BBB",
+    "CCC",
+    "DDD",
+    "EEE",
+    "GGG"
+   ],
+   "profile": {
+    "score": 80,
+    "level": "aggressive",
+    "recommended_method": "max_sharpe",
+    "max_weight": 0.4,
+    "target_horizon_years": 15
+   },
+   "portfolio": {
+    "method": "max_sharpe",
+    "weights": {
+     "AAA": 0.0692,
+     "CCC": 0.4,
+     "DDD": 0.3735,
+     "EEE": 0.1479,
+     "GGG": 0.0094
+    },
+    "expected_annual_return": 0.1854,
+    "annual_volatility": 0.0846,
+    "sharpe_ratio": 2.1916
+   }
+  },
+  {
+   "answers": {
+    "horizon": 3,
+    "drawdown_tolerance": 3,
+    "experience": 3,
+    "income_stability": 3,
+    "goal": 3
+   },
+   "symbols": [
+    "AAA",
+    "BBB",
+    "CCC",
+    "DDD",
+    "EEE",
+    "GGG"
+   ],
+   "profile": {
+    "score": 100,
+    "level": "aggressive",
+    "recommended_method": "max_sharpe",
+    "max_weight": 0.4,
+    "target_horizon_years": 15
+   },
+   "portfolio": {
+    "method": "max_sharpe",
+    "weights": {
+     "AAA": 0.0692,
+     "CCC": 0.4,
+     "DDD": 0.3735,
+     "EEE": 0.1479,
+     "GGG": 0.0094
+    },
+    "expected_annual_return": 0.1854,
+    "annual_volatility": 0.0846,
+    "sharpe_ratio": 2.1916
+   }
+  }
+ ],
+ "backtest": [
+  {
+   "symbols": [
+    "AAA",
+    "BBB",
+    "CCC",
+    "DDD"
+   ],
+   "days": 1095,
+   "method": "hrp",
+   "metrics": {
+    "total_return": 0.1468,
+    "cagr": 0.0541,
+    "annual_volatility": 0.0459,
+    "sharpe_ratio": 1.1785,
+    "max_drawdown": -0.0425,
+    "n_rebalances": 21
+   },
+   "raw": {
+    "cagr": 0.054113575693399474,
+    "vol": 0.0459165657760988
+   }
+  },
+  {
+   "symbols": [
+    "AAA",
+    "BBB",
+    "CCC",
+    "DDD"
+   ],
+   "days": 1095,
+   "method": "inverse_vol",
+   "metrics": {
+    "total_return": 0.203,
+    "cagr": 0.0737,
+    "annual_volatility": 0.0542,
+    "sharpe_ratio": 1.3597,
+    "max_drawdown": -0.0521,
+    "n_rebalances": 21
+   },
+   "raw": {
+    "cagr": 0.07371110194169761,
+    "vol": 0.05421186679820226
+   }
+  },
+  {
+   "symbols": [
+    "AAA",
+    "BBB",
+    "CCC",
+    "DDD"
+   ],
+   "days": 1095,
+   "method": "equal_weight",
+   "metrics": {
+    "total_return": 0.2555,
+    "cagr": 0.0915,
+    "annual_volatility": 0.0855,
+    "sharpe_ratio": 1.0705,
+    "max_drawdown": -0.0719,
+    "n_rebalances": 21
+   },
+   "raw": {
+    "cagr": 0.09149188203856884,
+    "vol": 0.08546343382940975
+   }
+  }
+ ],
+ "goal": [
+  {
+   "symbols": [
+    "AAA",
+    "BBB",
+    "CCC",
+    "DDD"
+   ],
+   "initial": 1000000,
+   "target": 10000000,
+   "years": 1,
+   "result": {
+    "initial": 1000000,
+    "target": 10000000,
+    "years": 1,
+    "required_cagr": 9.0,
+    "prob_success": 0.0,
+    "verdict": "unrealistic",
+    "projection": {
+     "median": 1054492.29,
+     "p5": 977777.3,
+     "p95": 1137226.22
+    },
+    "message": "达成该目标需要年化约 900%；按当前组合的历史收益/波动估算，达成概率约 0.0%。该目标在分散投资框架下基本无法实现——这种量级的年化回报只有极端杠杆/单一投机才可能短暂博到，期望结果是重大亏损。建议下调目标或拉长期限。",
+    "assumptions": {
+     "expected_return": 0.0541,
+     "expected_vol": 0.0459
+    }
+   }
+  },
+  {
+   "symbols": [
+    "AAA",
+    "BBB",
+    "CCC",
+    "DDD"
+   ],
+   "initial": 100000,
+   "target": 200000,
+   "years": 7,
+   "result": {
+    "initial": 100000,
+    "target": 200000,
+    "years": 7,
+    "required_cagr": 0.1041,
+    "prob_success": 0.004,
+    "verdict": "realistic",
+    "projection": {
+     "median": 144978.59,
+     "p5": 118717.32,
+     "p95": 177049.07
+    },
+    "message": "达成该目标需要年化约 10%；按当前组合的历史收益/波动估算，达成概率约 0.4%。该目标与长期股市回报相当，属可努力实现的范围。",
+    "assumptions": {
+     "expected_return": 0.0541,
+     "expected_vol": 0.0459
+    }
+   }
+  },
+  {
+   "symbols": [
+    "AAA",
+    "DDD",
+    "GGG"
+   ],
+   "initial": 50000,
+   "target": 60000,
+   "years": 3,
+   "result": {
+    "initial": 50000,
+    "target": 60000,
+    "years": 3,
+    "required_cagr": 0.0627,
+    "prob_success": 0.8175,
+    "verdict": "realistic",
+    "projection": {
+     "median": 68087.91,
+     "p5": 54116.92,
+     "p95": 85665.68
+    },
+    "message": "达成该目标需要年化约 6%；按当前组合的历史收益/波动估算，达成概率约 81.7%。该目标与长期股市回报相当，属可努力实现的范围。",
+    "assumptions": {
+     "expected_return": 0.1062,
+     "expected_vol": 0.0806
+    }
+   }
+  }
+ ],
+ "kelly": [
+  {
+   "args": [
+    1000000,
+    0.15,
+    10
+   ],
+   "result": {
+    "win_prob": 0.15,
+    "win_multiple": 10,
+    "loss_fraction": 1.0,
+    "full_kelly": 0.0556,
+    "fractional_kelly": 0.0139,
+    "capped_fraction": 0.0139,
+    "recommended_amount": 13888.89,
+    "note": "全凯利 5.6%，取 25% 分数凯利后 1.4%，封顶 10% → 建议单注 1.4%（¥13,889）。分散到多次不相关押注，单注归零不致命。"
+   }
+  },
+  {
+   "args": [
+    1000000,
+    0.05,
+    10
+   ],
+   "result": {
+    "win_prob": 0.05,
+    "win_multiple": 10,
+    "loss_fraction": 1.0,
+    "full_kelly": 0.0,
+    "fractional_kelly": 0.0,
+    "capped_fraction": 0.0,
+    "recommended_amount": 0.0,
+    "note": "在胜率 5%、目标 10x 下，凯利判定为「无正期望优势，不应押注」——要么你的胜率被高估，要么赔率不够。硬去押=长期走向破产。"
+   }
+  },
+  {
+   "args": [
+    250000,
+    0.4,
+    3
+   ],
+   "result": {
+    "win_prob": 0.4,
+    "win_multiple": 3,
+    "loss_fraction": 1.0,
+    "full_kelly": 0.1,
+    "fractional_kelly": 0.025,
+    "capped_fraction": 0.025,
+    "recommended_amount": 6250.0,
+    "note": "全凯利 10.0%，取 25% 分数凯利后 2.5%，封顶 10% → 建议单注 2.5%（¥6,250）。分散到多次不相关押注，单注归零不致命。"
+   }
+  },
+  {
+   "args": [
+    10000,
+    0.6,
+    2
+   ],
+   "result": {
+    "win_prob": 0.6,
+    "win_multiple": 2,
+    "loss_fraction": 1.0,
+    "full_kelly": 0.2,
+    "fractional_kelly": 0.05,
+    "capped_fraction": 0.05,
+    "recommended_amount": 500.0,
+    "note": "全凯利 20.0%，取 25% 分数凯利后 5.0%，封顶 10% → 建议单注 5.0%（¥500）。分散到多次不相关押注，单注归零不致命。"
+   }
+  }
+ ],
+ "barbell": [
+  {
+   "core": [
+    "AAA",
+    "CCC",
+    "DDD"
+   ],
+   "sat": [
+    "EEE",
+    "GGG",
+    "JJJ"
+   ],
+   "safe": 0.8,
+   "result": {
+    "weights": {
+     "AAA": 0.0993,
+     "CCC": 0.5085,
+     "DDD": 0.2025,
+     "EEE": 0.1013,
+     "GGG": 0.0032,
+     "JJJ": 0.0853
+    },
+    "safe_pct": 0.8,
+    "risk_pct": 0.2,
+    "core_symbols": [
+     "AAA",
+     "CCC",
+     "DDD"
+    ],
+    "satellite_symbols": [
+     "EEE",
+     "GGG",
+     "JJJ"
+    ],
+    "per_bet_cap": 0.1,
+    "note": "杠铃：80% 保命核心（min_volatility）+ 20% 进攻 sleeve（momentum，单注封顶 10%）。进攻端归零不致命，右尾一旦命中由凸性放大。"
+   }
+  },
+  {
+   "core": [
+    "AAA",
+    "CCC",
+    "DDD"
+   ],
+   "sat": [
+    "EEE"
+   ],
+   "safe": 0.7,
+   "result": {
+    "weights": {
+     "AAA": 0.0858,
+     "CCC": 0.4392,
+     "DDD": 0.1749,
+     "EEE": 0.3
+    },
+    "safe_pct": 0.7
+   }
+  }
+ ],
+ "screen": [
+  {
+   "mode": "momentum",
+   "symbols": [
+    "AAA",
+    "BBB",
+    "CCC",
+    "DDD",
+    "EEE",
+    "FFF",
+    "GGG",
+    "HHH",
+    "III",
+    "JJJ"
+   ],
+   "days": 400,
+   "result": [
+    {
+     "symbol": "JJJ",
+     "score": 0.3613,
+     "momentum": {
+      "3m": 0.3033,
+      "6m": 0.2731,
+      "12m": 1.0482
+     },
+     "near_52w_high": 0.8684,
+     "breakout": false,
+     "trend": "sideways",
+     "risk": {
+      "annualized_vol": 0.5022,
+      "max_drawdown": -0.4662
+     }
+    },
+    {
+     "symbol": "HHH",
+     "score": 0.1591,
+     "momentum": {
+      "3m": 0.2129,
+      "6m": 0.2797,
+      "12m": 0.133
+     },
+     "near_52w_high": 0.876,
+     "breakout": false,
+     "trend": "sideways",
+     "risk": {
+      "annualized_vol": 0.2907,
+      "max_drawdown": -0.2999
+     }
+    },
+    {
+     "symbol": "EEE",
+     "score": 0.1536,
+     "momentum": {
+      "3m": -0.2009,
+      "6m": 0.3657,
+      "12m": 0.7018
+     },
+     "near_52w_high": 0.5699,
+     "breakout": false,
+     "trend": "sideways",
+     "risk": {
+      "annualized_vol": 0.4672,
+      "max_drawdown": -0.4378
+     }
+    },
+    {
+     "symbol": "DDD",
+     "score": 0.0695,
+     "momentum": {
+      "3m": 0.0511,
+      "6m": 0.1254,
+      "12m": 0.0682
+     },
+     "near_52w_high": 0.9945,
+     "breakout": false,
+     "trend": "uptrend",
+     "risk": {
+      "annualized_vol": 0.0904,
+      "max_drawdown": -0.1091
+     }
+    },
+    {
+     "symbol": "CCC",
+     "score": 0.024,
+     "momentum": {
+      "3m": 0.0016,
+      "6m": 0.0286,
+      "12m": 0.0817
+     },
+     "near_52w_high": 0.9816,
+     "breakout": false,
+     "trend": "uptrend",
+     "risk": {
+      "annualized_vol": 0.0594,
+      "max_drawdown": -0.0302
+     }
+    },
+    {
+     "symbol": "AAA",
+     "score": 0.0022,
+     "momentum": {
+      "3m": 0.0206,
+      "6m": 0.0034,
+      "12m": 0.0676
+     },
+     "near_52w_high": 0.8824,
+     "breakout": false,
+     "trend": "sideways",
+     "risk": {
+      "annualized_vol": 0.1563,
+      "max_drawdown": -0.1178
+     }
+    },
+    {
+     "symbol": "GGG",
+     "score": -0.0198,
+     "momentum": {
+      "3m": -0.0088,
+      "6m": 0.0102,
+      "12m": -0.0121
+     },
+     "near_52w_high": 0.8749,
+     "breakout": false,
+     "trend": "sideways",
+     "risk": {
+      "annualized_vol": 0.322,
+      "max_drawdown": -0.2768
+     }
+    },
+    {
+     "symbol": "BBB",
+     "score": -0.0285,
+     "momentum": {
+      "3m": 0.0116,
+      "6m": 0.008,
+      "12m": -0.0378
+     },
+     "near_52w_high": 0.8223,
+     "breakout": false,
+     "trend": "sideways",
+     "risk": {
+      "annualized_vol": 0.2531,
+      "max_drawdown": -0.2216
+     }
+    },
+    {
+     "symbol": "III",
+     "score": -0.1187,
+     "momentum": {
+      "3m": -0.1086,
+      "6m": -0.0565,
+      "12m": -0.1727
+     },
+     "near_52w_high": 0.7516,
+     "breakout": false,
+     "trend": "downtrend",
+     "risk": {
+      "annualized_vol": 0.2046,
+      "max_drawdown": -0.2486
+     }
+    },
+    {
+     "symbol": "FFF",
+     "score": -0.191,
+     "momentum": {
+      "3m": -0.172,
+      "6m": -0.1546,
+      "12m": -0.2281
+     },
+     "near_52w_high": 0.6783,
+     "breakout": false,
+     "trend": "sideways",
+     "risk": {
+      "annualized_vol": 0.401,
+      "max_drawdown": -0.4447
+     }
+    }
+   ]
+  },
+  {
+   "mode": "multibagger",
+   "symbols": [
+    "AAA",
+    "BBB",
+    "CCC",
+    "DDD",
+    "EEE",
+    "FFF",
+    "GGG",
+    "HHH",
+    "III",
+    "JJJ"
+   ],
+   "days": 400,
+   "result": [
+    {
+     "symbol": "EEE",
+     "score": 0.3057,
+     "momentum": {
+      "3m": -0.2009,
+      "6m": 0.3657,
+      "12m": 0.7018
+     },
+     "near_52w_high": 0.5699,
+     "breakout": false,
+     "trend": "sideways",
+     "risk": {
+      "annualized_vol": 0.4672,
+      "max_drawdown": -0.4378
+     }
+    },
+    {
+     "symbol": "FFF",
+     "score": 0.1842,
+     "momentum": {
+      "3m": -0.172,
+      "6m": -0.1546,
+      "12m": -0.2281
+     },
+     "near_52w_high": 0.6783,
+     "breakout": false,
+     "trend": "sideways",
+     "risk": {
+      "annualized_vol": 0.401,
+      "max_drawdown": -0.4447
+     }
+    },
+    {
+     "symbol": "III",
+     "score": 0.1285,
+     "momentum": {
+      "3m": -0.1086,
+      "6m": -0.0565,
+      "12m": -0.1727
+     },
+     "near_52w_high": 0.7516,
+     "breakout": false,
+     "trend": "downtrend",
+     "risk": {
+      "annualized_vol": 0.2046,
+      "max_drawdown": -0.2486
+     }
+    },
+    {
+     "symbol": "JJJ",
+     "score": 0.1214,
+     "momentum": {
+      "3m": 0.3033,
+      "6m": 0.2731,
+      "12m": 1.0482
+     },
+     "near_52w_high": 0.8684,
+     "breakout": false,
+     "trend": "sideways",
+     "risk": {
+      "annualized_vol": 0.5022,
+      "max_drawdown": -0.4662
+     }
+    },
+    {
+     "symbol": "BBB",
+     "score": 0.0797,
+     "momentum": {
+      "3m": 0.0116,
+      "6m": 0.008,
+      "12m": -0.0378
+     },
+     "near_52w_high": 0.8223,
+     "breakout": false,
+     "trend": "sideways",
+     "risk": {
+      "annualized_vol": 0.2531,
+      "max_drawdown": -0.2216
+     }
+    },
+    {
+     "symbol": "AAA",
+     "score": 0.0643,
+     "momentum": {
+      "3m": 0.0206,
+      "6m": 0.0034,
+      "12m": 0.0676
+     },
+     "near_52w_high": 0.8824,
+     "breakout": false,
+     "trend": "sideways",
+     "risk": {
+      "annualized_vol": 0.1563,
+      "max_drawdown": -0.1178
+     }
+    },
+    {
+     "symbol": "GGG",
+     "score": 0.061,
+     "momentum": {
+      "3m": -0.0088,
+      "6m": 0.0102,
+      "12m": -0.0121
+     },
+     "near_52w_high": 0.8749,
+     "breakout": false,
+     "trend": "sideways",
+     "risk": {
+      "annualized_vol": 0.322,
+      "max_drawdown": -0.2768
+     }
+    },
+    {
+     "symbol": "CCC",
+     "score": 0.0169,
+     "momentum": {
+      "3m": 0.0016,
+      "6m": 0.0286,
+      "12m": 0.0817
+     },
+     "near_52w_high": 0.9816,
+     "breakout": false,
+     "trend": "uptrend",
+     "risk": {
+      "annualized_vol": 0.0594,
+      "max_drawdown": -0.0302
+     }
+    },
+    {
+     "symbol": "HHH",
+     "score": -0.0026,
+     "momentum": {
+      "3m": 0.2129,
+      "6m": 0.2797,
+      "12m": 0.133
+     },
+     "near_52w_high": 0.876,
+     "breakout": false,
+     "trend": "sideways",
+     "risk": {
+      "annualized_vol": 0.2907,
+      "max_drawdown": -0.2999
+     }
+    },
+    {
+     "symbol": "DDD",
+     "score": -0.0161,
+     "momentum": {
+      "3m": 0.0511,
+      "6m": 0.1254,
+      "12m": 0.0682
+     },
+     "near_52w_high": 0.9945,
+     "breakout": false,
+     "trend": "uptrend",
+     "risk": {
+      "annualized_vol": 0.0904,
+      "max_drawdown": -0.1091
+     }
+    }
+   ]
+  }
+ ],
+ "explain": [
+  {
+   "profile": {
+    "score": 7,
+    "level": "conservative",
+    "recommended_method": "min_volatility",
+    "max_weight": 0.2,
+    "target_horizon_years": 1
+   },
+   "portfolio": {
+    "method": "min_volatility",
+    "weights": {
+     "AAA": 0.2,
+     "BBB": 0.2,
+     "CCC": 0.2,
+     "DDD": 0.2,
+     "EEE": 0.0464,
+     "GGG": 0.1535
+    },
+    "expected_annual_return": 0.0813,
+    "annual_volatility": 0.0945,
+    "sharpe_ratio": 0.8609
+   },
+   "result": {
+    "source": "fallback",
+    "explanation": "根据你的风险画像（评分 7，档位「保守」），系统用 min_volatility 方法构建了如下组合：AAA 20%、BBB 20%、CCC 20%、DDD 20%、GGG 15%、EEE 5%。\n该方法在同类资产间做了分散配置以平衡风险。历史数据估算：年化收益约 8.1%、波动约 9.4%、夏普 0.86——这是对历史的回顾，并非未来预测。\n以上仅供教育参考，不构成投资建议。"
+   }
+  },
+  {
+   "profile": {
+    "score": 33,
+    "level": "moderate_conservative",
+    "recommended_method": "hrp",
+    "max_weight": 0.25,
+    "target_horizon_years": 3
+   },
+   "portfolio": {
+    "method": "hrp",
+    "weights": {
+     "AAA": 0.0597,
+     "BBB": 0.0237,
+     "CCC": 0.6271,
+     "DDD": 0.2595,
+     "EEE": 0.0083,
+     "GGG": 0.0218
+    },
+    "expected_annual_return": 0.0932,
+    "annual_volatility": 0.0439,
+    "sharpe_ratio": 2.1212
+   },
+   "result": {
+    "source": "fallback",
+    "explanation": "根据你的风险画像（评分 33，档位「稳健偏保守」），系统用 hrp 方法构建了如下组合：CCC 63%、DDD 26%、AAA 6%、BBB 2%、GGG 2%、EEE 1%。\n该方法在同类资产间做了分散配置以平衡风险。历史数据估算：年化收益约 9.3%、波动约 4.4%、夏普 2.12——这是对历史的回顾，并非未来预测。\n以上仅供教育参考，不构成投资建议。"
+   }
+  },
+  {
+   "profile": {
+    "score": 53,
+    "level": "moderate",
+    "recommended_method": "hrp",
+    "max_weight": 0.3,
+    "target_horizon_years": 7
+   },
+   "portfolio": {
+    "method": "hrp",
+    "weights": {
+     "AAA": 0.0597,
+     "BBB": 0.0237,
+     "CCC": 0.6271,
+     "DDD": 0.2595,
+     "EEE": 0.0083,
+     "GGG": 0.0218
+    },
+    "expected_annual_return": 0.0932,
+    "annual_volatility": 0.0439,
+    "sharpe_ratio": 2.1212
+   },
+   "result": {
+    "source": "fallback",
+    "explanation": "根据你的风险画像（评分 53，档位「稳健」），系统用 hrp 方法构建了如下组合：CCC 63%、DDD 26%、AAA 6%、BBB 2%、GGG 2%、EEE 1%。\n该方法在同类资产间做了分散配置以平衡风险。历史数据估算：年化收益约 9.3%、波动约 4.4%、夏普 2.12——这是对历史的回顾，并非未来预测。\n以上仅供教育参考，不构成投资建议。"
+   }
+  },
+  {
+   "profile": {
+    "score": 80,
+    "level": "aggressive",
+    "recommended_method": "max_sharpe",
+    "max_weight": 0.4,
+    "target_horizon_years": 15
+   },
+   "portfolio": {
+    "method": "max_sharpe",
+    "weights": {
+     "AAA": 0.0692,
+     "CCC": 0.4,
+     "DDD": 0.3735,
+     "EEE": 0.1479,
+     "GGG": 0.0094
+    },
+    "expected_annual_return": 0.1854,
+    "annual_volatility": 0.0846,
+    "sharpe_ratio": 2.1916
+   },
+   "result": {
+    "source": "fallback",
+    "explanation": "根据你的风险画像（评分 80，档位「进取」），系统用 max_sharpe 方法构建了如下组合：CCC 40%、DDD 37%、EEE 15%、AAA 7%、GGG 1%。\n该方法在同类资产间做了分散配置以平衡风险。历史数据估算：年化收益约 18.5%、波动约 8.5%、夏普 2.19——这是对历史的回顾，并非未来预测。\n以上仅供教育参考，不构成投资建议。"
+   }
+  },
+  {
+   "profile": {
+    "score": 100,
+    "level": "aggressive",
+    "recommended_method": "max_sharpe",
+    "max_weight": 0.4,
+    "target_horizon_years": 15
+   },
+   "portfolio": {
+    "method": "max_sharpe",
+    "weights": {
+     "AAA": 0.0692,
+     "CCC": 0.4,
+     "DDD": 0.3735,
+     "EEE": 0.1479,
+     "GGG": 0.0094
+    },
+    "expected_annual_return": 0.1854,
+    "annual_volatility": 0.0846,
+    "sharpe_ratio": 2.1916
+   },
+   "result": {
+    "source": "fallback",
+    "explanation": "根据你的风险画像（评分 100，档位「进取」），系统用 max_sharpe 方法构建了如下组合：CCC 40%、DDD 37%、EEE 15%、AAA 7%、GGG 1%。\n该方法在同类资产间做了分散配置以平衡风险。历史数据估算：年化收益约 18.5%、波动约 8.5%、夏普 2.19——这是对历史的回顾，并非未来预测。\n以上仅供教育参考，不构成投资建议。"
+   }
+  }
+ ]
+}

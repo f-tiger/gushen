@@ -2,8 +2,12 @@
 
 依据用户目标与风险画像，用**确定性优化算法**自动构建/再平衡美股投资组合，用**模拟盘**验证策略，用 **LLM** 做风险画像访谈与组合解读。最终用于指导真实投资。
 
-> **前端已上线（Cloudflare Pages）**：https://gushen-4g2.pages.dev
-> 静态前端需连后端才有完整功能：把后端部署到能跑 Python 的主机后，在仓库 Variables 设 `VITE_API_BASE_URL` 指向它并重新触发部署即可（详见 [DEPLOY.md](DEPLOY.md)）。
+> **纯前端版已上线（Cloudflare Pages）**：https://gushen-4g2.pages.dev —— 2026-09-27 重构，**不再需要后端**。
+> 风险画像、6 种组合方法（HRP / 逆波动 / 最小波动 / 最大夏普 / 等权 / 动量）、目标可行性、凯利、杠铃、选股器
+> 全部在浏览器里计算（`frontend/src/engine/`），行情是部署时从 Yahoo 抓的复权收盘价，随站发布为 `/data/prices.json`
+> （标的池见 `scripts/universe.json`，每个美股交易日收盘后自动重建）。与后端 Python 原版的逐项对照测试见
+> `frontend/src/engine/crosscheck.test.ts`。`backend/` 保留作参考与对照基准，线上不用它。
+> 数据源提醒：Yahoo 行情在其条款下属个人/原型用途，对外商用或再分发需要付费授权（同 `docs/research.md` 的原有结论）。
 
 > ⚠️ 本项目为信息/教育用途，输出不构成投资建议。数据源与合规存在硬约束，详见 `docs/`。
 

@@ -32,7 +32,7 @@ function Screener() {
     <div style={card}>
       <h3 style={{ marginTop: 0 }}>成长筛选器</h3>
       <p style={{ color: "#666", marginTop: 0 }}>
-        multibagger 模式基于 464 只 10 倍股实证：奖励远离高点 + 高 FCF yield；momentum 模式追当前强势。
+        multibagger 模式基于 464 只 10 倍股实证：奖励远离高点、弱化短动量（本版没有基本面数据，不含 FCF yield）；momentum 模式追当前强势。
       </p>
       <input value={symbols} onChange={(e) => setSymbols(e.target.value)} style={{ width: "100%", padding: 8 }} />
       <div style={{ margin: "8px 0" }}>
@@ -146,6 +146,7 @@ function BarbellBuilder() {
           </tbody>
         </table>
       )}
+      {res?.note && <p style={{ color: "#888", fontSize: 12, marginTop: 8 }}>{res.note}</p>}
     </div>
   );
 }

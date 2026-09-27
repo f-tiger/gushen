@@ -1,56 +1,66 @@
-// 后端接口封装。
-// 开发时通过 vite 代理 /api → http://localhost:8000。
-// 生产（如 Cloudflare Pages）需把后端部署到可访问地址，并在构建时设置
-// VITE_API_BASE_URL（例：https://api.example.com），否则 /api 请求无后端可达。
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
+// 纯前端版「接口」：函数名与返回结构和原先的后端 API 保持一致，界面代码不用改；
+// 区别是全部在浏览器里计算，数据来自随站发布的 /data/prices.json（见 engine/data.ts）。
+// 回看窗口沿用后端路由的默认值：推荐组合 365 天、杠铃 365 天、目标可行性 1095 天、选股 400 天。
 
-function apiUrl(path: string): string {
-  return `${API_BASE}${path}`;
+import { frameFor, loadPrices, normalize, seriesFor, type PriceFile } from "./engine/data";
+import { explainPortfolio as explainTemplate } from "./engine/explain";
+import { optimize, type OptimizeResult } from "./engine/optimizer";
+import {
+  analyzeGoal as analyzeGoalCore,
+  backtest,
+  buildBarbell as buildBarbellCore,
+  scoreAnswers,
+  sizeBet,
+  type GoalResult,
+  type KellyResult,
+  type Profile,
+} from "./engine/planning";
+import { screen, type ScreenCandidate } from "./engine/screener";
+
+export type { ScreenCandidate };
+
+export interface DataInfo {
+  asOf: string;
+  generated: string;
+  source: string;
+  symbols: string[];
+  stale: string[];
 }
 
-async function postJson<T>(path: string, body: unknown): Promise<T> {
-  const res = await fetch(apiUrl(path), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) throw new Error((await res.json()).detail ?? res.statusText);
-  return res.json();
+export async function dataInfo(): Promise<DataInfo> {
+  const p = await loadPrices();
+  return { asOf: p.asOf, generated: p.generated, source: p.source, symbols: Object.keys(p.close).sort(), stale: p.stale ?? [] };
 }
+
+const skippedNote = (skipped: string[]) => (skipped.length ? `数据集里没有、已跳过：${skipped.join(", ")}。` : "");
 
 // ---- 进攻工具 ----
 
-export interface ScreenCandidate {
-  symbol: string;
-  score: number;
-  momentum: { "3m": number | null; "6m": number | null; "12m": number | null };
-  near_52w_high: number;
-  breakout: boolean;
-  trend: string;
-  risk: { annualized_vol: number; max_drawdown: number };
-}
-
-export function screenStocks(
+export async function screenStocks(
   symbols: string[],
   mode: "momentum" | "multibagger"
 ): Promise<{ mode: string; candidates: ScreenCandidate[]; note: string }> {
-  return postJson("/api/analysis/screen", { symbols, mode, top_k: 10 });
+  const p: PriceFile = await loadPrices();
+  const series: Record<string, number[]> = {};
+  const skipped: string[] = [];
+  for (const s of normalize(symbols)) {
+    const x = seriesFor(p, s, 400);
+    if (x) series[s] = x;
+    else skipped.push(s);
+  }
+  if (!Object.keys(series).length) throw new Error("无可用行情数据。" + skippedNote(skipped));
+  const candidates = screen(series, 10, mode);
+  const base =
+    mode === "multibagger"
+      ? "multibagger 模式：基于 464 只 10 倍股实证，奖励远离高点、弱化短动量；本版无基本面数据，未融合 FCF yield，只按价格评分。"
+      : "momentum 模式：追当前上行强度，非预测；高分通常高波动。";
+  return { mode, candidates, note: base + " 集中押注上行大、下行也大。" + skippedNote(skipped) };
 }
 
-export interface KellyResponse {
-  full_kelly: number;
-  fractional_kelly: number;
-  capped_fraction: number;
-  recommended_amount: number;
-  note: string;
-}
+export type KellyResponse = KellyResult;
 
-export function kellySize(
-  bankroll: number,
-  win_prob: number,
-  win_multiple: number
-): Promise<KellyResponse> {
-  return postJson("/api/planning/kelly", { bankroll, win_prob, win_multiple });
+export async function kellySize(bankroll: number, win_prob: number, win_multiple: number): Promise<KellyResponse> {
+  return sizeBet(bankroll, win_prob, win_multiple);
 }
 
 export interface BarbellResponse {
@@ -59,80 +69,61 @@ export interface BarbellResponse {
   note?: string;
 }
 
-export function buildBarbell(
-  core_symbols: string[],
-  satellite_symbols: string[],
-  safe_pct: number
-): Promise<BarbellResponse> {
-  return postJson("/api/portfolios/barbell", { core_symbols, satellite_symbols, safe_pct });
+export async function buildBarbell(core_symbols: string[], satellite_symbols: string[], safe_pct: number): Promise<BarbellResponse> {
+  const p = await loadPrices();
+  const sat = normalize(satellite_symbols);
+  if (!sat.length) throw new Error("进攻端至少需要 1 个标的");
+  const core = frameFor(p, core_symbols, 365);
+  let satFrame = null;
+  let skipped = core.skipped;
+  if (sat.length >= 2) {
+    const f = frameFor(p, sat, 365);
+    satFrame = f.frame;
+    skipped = skipped.concat(f.skipped);
+  } else if (!p.close[sat[0]]) {
+    throw new Error(`数据集里没有 ${sat[0]}。可选代码见页面底部。`);
+  }
+  try {
+    const r = buildBarbellCore(core.frame, satFrame, sat, safe_pct);
+    return { ...r, note: (r.note ?? "") + skippedNote(skipped) };
+  } catch (e) {
+    throw new Error(`杠铃构造失败: ${e instanceof Error ? e.message : e}`);
+  }
 }
+
+// ---- 智能投顾 ----
 
 export interface RecommendResponse {
-  profile: {
-    score: number;
-    level: string;
-    recommended_method: string;
-    max_weight: number;
-    target_horizon_years: number;
-  };
-  portfolio: {
-    method: string;
-    weights: Record<string, number>;
-    expected_annual_return: number;
-    annual_volatility: number;
-    sharpe_ratio: number;
-  };
+  profile: Profile;
+  portfolio: OptimizeResult;
+  skipped?: string[];
 }
 
-export async function recommend(
-  answers: Record<string, number>,
-  symbols: string[]
-): Promise<RecommendResponse> {
-  const res = await fetch(apiUrl("/api/portfolio/recommend"), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ answers, symbols }),
-  });
-  if (!res.ok) throw new Error((await res.json()).detail ?? res.statusText);
-  return res.json();
+export async function recommend(answers: Record<string, number>, symbols: string[]): Promise<RecommendResponse> {
+  const profile = scoreAnswers(answers);
+  const p = await loadPrices();
+  const { frame, skipped } = frameFor(p, symbols, 365);
+  try {
+    const portfolio = optimize(frame, profile.recommended_method, [0, profile.max_weight]);
+    return { profile, portfolio, skipped };
+  } catch (e) {
+    throw new Error(`优化失败: ${e instanceof Error ? e.message : e}`);
+  }
 }
 
-export interface GoalResponse {
-  initial: number;
-  target: number;
-  years: number;
-  required_cagr: number;
-  prob_success: number;
-  verdict: string;
-  projection: { median: number; p5: number; p95: number };
-  message: string;
-  assumptions: { expected_return: number; expected_vol: number };
-}
+export type GoalResponse = GoalResult;
 
-export async function analyzeGoal(
-  initial: number,
-  target: number,
-  years: number,
-  symbols: string[]
-): Promise<GoalResponse> {
-  const res = await fetch(apiUrl("/api/planning/goal"), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ initial, target, years, symbols, method: "hrp" }),
-  });
-  if (!res.ok) throw new Error((await res.json()).detail ?? res.statusText);
-  return res.json();
+export async function analyzeGoal(initial: number, target: number, years: number, symbols: string[]): Promise<GoalResponse> {
+  const p = await loadPrices();
+  const { frame } = frameFor(p, symbols, 1095);
+  // 与后端一致：用该标的池的 HRP 月度 walk-forward 回测估算年化收益与波动
+  const bt = backtest(frame, "hrp");
+  return analyzeGoalCore(initial, target, years, bt.cagr, bt.annual_volatility);
 }
 
 export async function explainPortfolio(
   profile: RecommendResponse["profile"],
   portfolio: RecommendResponse["portfolio"]
 ): Promise<{ source: string; explanation: string }> {
-  const res = await fetch(apiUrl("/api/ai/explain-portfolio"), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ profile, portfolio }),
-  });
-  if (!res.ok) throw new Error((await res.json()).detail ?? res.statusText);
-  return res.json();
+  return explainTemplate(profile, portfolio);
 }
