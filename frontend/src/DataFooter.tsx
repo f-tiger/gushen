@@ -21,6 +21,10 @@ export default function DataFooter() {
         </p>
       )}
       <p style={{ margin: 0 }}>可选代码（{info.symbols.length}）：{info.symbols.join(", ")}</p>
+      <p style={{ margin: "6px 0 0" }}>
+        本工具属于 <a href="https://agiscorecard.com/invest">AGI Scorecard 投资板块</a>；想知道「抄大佬 13F 作业」按申报日价格到底赚不赚钱，见{" "}
+        <a href="https://agiscorecard.com/zh/does-copying-13f-work">这份实测</a>。
+      </p>
     </div>
   );
 }

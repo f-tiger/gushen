@@ -89,7 +89,11 @@ jobs:
           for i in 1 2 3 4 5 6 7 8; do
             got=$(curl -s --max-time 20 "$SITE/data/prices.json" | python3 -c "import sys,json;print(json.load(sys.stdin).get('generated',''))" 2>/dev/null || true)
             home=$(curl -s -o /dev/null -w "%{http_code}" --max-time 20 "$SITE/")
-            if [ "$got" = "$want" ] && [ "$home" = 200 ]; then echo "live: data generated $got"; exit 0; fi
-            echo "waiting ($i): live=$got home=$home"; sleep 15
+            robots=$(curl -s --max-time 20 "$SITE/robots.txt" | head -c 200)
+            llms=$(curl -s --max-time 20 "$SITE/llms.txt" | head -c 40)
+            # 静态站的兜底页会把不存在的路径回成 index.html —— 断言这两个是真文件，不是兜底网页
+            case "$robots$llms" in *"<html"*|*"<!doctype"*) ok_files=0 ;; *Sitemap:*"# 股神"*) ok_files=1 ;; *) ok_files=0 ;; esac
+            if [ "$got" = "$want" ] && [ "$home" = 200 ] && [ "$ok_files" = 1 ]; then echo "live: data generated $got; robots/llms are real files"; exit 0; fi
+            echo "waiting ($i): live=$got home=$home files=$ok_files"; sleep 15
           done
           echo "::error::live site does not serve the data just built"; exit 1
