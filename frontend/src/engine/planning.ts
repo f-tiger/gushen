@@ -3,7 +3,7 @@
 // portfolio/barbell.py 与 api/routes/portfolio.py 的单标的杠铃分支。数字口径逐项对齐。
 
 import { optimize } from "./optimizer";
-import { Frame, headRows, normCdf, pctChange, round, std, tailRows, TRADING_DAYS } from "./stats";
+import { Frame, normCdf, round } from "./stats";
 
 // ---------------- 风险画像（确定性映射，可审计） ----------------
 
@@ -38,98 +38,9 @@ export function scoreAnswers(answers: Record<string, number>): Profile {
   return { score, level: "moderate", recommended_method: "hrp", max_weight: 0.3, target_horizon_years: horizon };
 }
 
-// ---------------- Walk-forward 回测（组合算法的验证器） ----------------
-
-export interface BacktestMetrics {
-  total_return: number;
-  cagr: number;
-  annual_volatility: number;
-  sharpe_ratio: number;
-  max_drawdown: number;
-  n_rebalances: number;
-}
-
-/** 月初再平衡（pandas freq="MS"）：只在「每月 1 日恰好是交易日」时触发，与后端一致。 */
-function monthStarts(fromIso: string, toIso: string): Set<string> {
-  const out = new Set<string>();
-  const [y0, m0, d0] = fromIso.split("-").map(Number);
-  let y = y0;
-  let m = d0 === 1 ? m0 : m0 + 1;
-  if (m > 12) {
-    m = 1;
-    y++;
-  }
-  for (;;) {
-    const iso = `${y}-${String(m).padStart(2, "0")}-01`;
-    if (iso > toIso) break;
-    out.add(iso);
-    m++;
-    if (m > 12) {
-      m = 1;
-      y++;
-    }
-  }
-  return out;
-}
-
-export function backtest(
-  f: Frame,
-  method = "hrp",
-  lookbackWindow = 126,
-  initial = 100_000,
-  costBps = 5,
-  weightBounds: [number, number] = [0, 1]
-): BacktestMetrics {
-  const T = f.dates.length;
-  if (T <= lookbackWindow + 5) throw new Error("历史数据长度不足以覆盖回测窗口");
-  const rets = f.px.map((p) => [0, ...pctChange(p)]); // pct_change().fillna(0)
-  const rebal = monthStarts(f.dates[lookbackWindow], f.dates[T - 1]);
-  const costRate = costBps / 10_000;
-
-  let value = initial;
-  let weights: Record<string, number> = {};
-  let prev: Record<string, number> = {};
-  let n = 0;
-  const nav: number[] = [];
-  for (let t = lookbackWindow; t < T; t++) {
-    if (rebal.has(f.dates[t]) || Object.keys(weights).length === 0) {
-      const window = tailRows(headRows(f, t), lookbackWindow);
-      try {
-        weights = optimize(window, method, weightBounds).weights;
-      } catch {
-        weights = Object.keys(prev).length ? prev : Object.fromEntries(f.cols.map((c) => [c, 1 / f.cols.length]));
-      }
-      const keys = new Set([...Object.keys(weights), ...Object.keys(prev)]);
-      let turnover = 0;
-      for (const k of keys) turnover += Math.abs((weights[k] ?? 0) - (prev[k] ?? 0));
-      value *= 1 - turnover * costRate;
-      prev = weights;
-      n++;
-    }
-    let r = 0;
-    for (const [c, w] of Object.entries(weights)) r += w * rets[f.cols.indexOf(c)][t];
-    value *= 1 + r;
-    nav.push(value);
-  }
-  const portRet = [0, ...pctChange(nav)];
-  const years = nav.length / TRADING_DAYS;
-  const cagr = years > 0 ? (nav[nav.length - 1] / nav[0]) ** (1 / years) - 1 : 0;
-  const annVol = std(portRet) * Math.sqrt(TRADING_DAYS);
-  let peak = -Infinity;
-  let mdd = 0;
-  for (const v of nav) {
-    peak = Math.max(peak, v);
-    mdd = Math.min(mdd, v / peak - 1);
-  }
-  return {
-    total_return: nav[nav.length - 1] / nav[0] - 1,
-    cagr,
-    annual_volatility: annVol,
-    sharpe_ratio: annVol > 0 ? cagr / annVol : 0,
-    max_drawdown: mdd,
-    n_rebalances: n,
-  };
-}
+// v2 accounting is tested against hand-calculated cases, not the legacy Python bug.
+export { backtest } from './walkforward';
+export type { BacktestMetrics } from './walkforward';
 
 // ---------------- 目标可行性（对数正态，不承诺收益） ----------------
 
@@ -167,7 +78,7 @@ export function analyzeGoal(
   expectedReturn: number,
   expectedVol: number
 ): GoalResult {
-  if (!(initial > 0) || !(target > 0) || !(years > 0)) throw new Error("初始资金、目标与年限都必须为正数");
+  if (![initial, target, years, expectedReturn, expectedVol].every(Number.isFinite) || !(initial > 0) || !(target > 0) || !(years > 0) || expectedVol < 0 || expectedReturn <= -1) throw new Error("初始资金、目标与年限都必须为正数");
   const requiredCagr = (target / initial) ** (1 / years) - 1;
   let prob: number, median: number, p5: number, p95: number;
   if (expectedVol > 0) {
@@ -185,7 +96,7 @@ export function analyzeGoal(
   }
   const verdict = classify(requiredCagr);
   const message =
-    `达成该目标需要年化约 ${(requiredCagr * 100).toFixed(0)}%；按当前组合的历史收益/波动估算，达成概率约 ${(prob * 100).toFixed(1)}%。` +
+    `达成该目标需要年化约 ${(requiredCagr * 100).toFixed(0)}%；在历史参数不变的对数正态模型假设下，情景概率约 ${(prob * 100).toFixed(1)}%。` +
     TAIL[verdict];
   return {
     initial: round(initial, 2),
@@ -287,3 +198,4 @@ export function buildBarbell(core: Frame, satellite: Frame | null, satSymbols: s
     note: `杠铃：${pct(safePct, 0)} 保命核心（min_volatility）+ ${pct(riskPct, 0)} 进攻 sleeve（momentum，单注封顶 ${pct(perBetCap, 0)}）。进攻端归零不致命，右尾一旦命中由凸性放大。`,
   };
 }
+

@@ -12,6 +12,7 @@ import {
   scoreAnswers,
   sizeBet,
   type GoalResult,
+  type BacktestMetrics,
   type KellyResult,
   type Profile,
 } from "./engine/planning";
@@ -111,14 +112,15 @@ export async function recommend(answers: Record<string, number>, symbols: string
   }
 }
 
-export type GoalResponse = GoalResult;
+export type GoalResponse = GoalResult & { evaluation: BacktestMetrics; equalWeight: BacktestMetrics; skipped: string[] };
 
 export async function analyzeGoal(initial: number, target: number, years: number, symbols: string[]): Promise<GoalResponse> {
   const p = await loadPrices();
-  const { frame } = frameFor(p, symbols, 1095);
-  // 与后端一致：用该标的池的 HRP 月度 walk-forward 回测估算年化收益与波动
+  const { frame, skipped } = frameFor(p, symbols, 1095);
+  // v2: prior data, next monthly session close, drifting holdings, explicit costs.
   const bt = backtest(frame, "hrp");
-  return analyzeGoalCore(initial, target, years, bt.cagr, bt.annual_volatility);
+  const model = analyzeGoalCore(initial, target, years, bt.annual_arithmetic_return, bt.annual_volatility);
+  return { ...model, evaluation: bt, equalWeight: backtest(frame, "equal_weight"), skipped };
 }
 
 export async function explainPortfolio(
@@ -127,3 +129,4 @@ export async function explainPortfolio(
 ): Promise<{ source: string; explanation: string }> {
   return explainTemplate(profile, portfolio);
 }
+
