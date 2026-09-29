@@ -1,8 +1,10 @@
 # 股神 Gushen · 投资研究工作台
 
-线上应用：**https://gushen.agiscorecard.com/** · [AGI 投资研究](https://agiscorecard.com/zh/invest)
+线上应用：[简体中文](https://gushen.agiscorecard.com/zh/) · [English](https://gushen.agiscorecard.com/en/) · [AGI 投资研究](https://agiscorecard.com/zh/invest)
 
 面向中文美股 / ETF 自主研究者，把「建立组合 → 同窗比较 → 风险解释 → 情景推演 → 保存复盘」连成可复查的工作流。研究用户自己的假设，不提供交易执行或收益承诺。
+
+中英文各自沿用 AGI 主站的主题和导航；切换语言保留当前研究，个人日志不会自动翻译。语言与验收记录见 [AGI 对齐说明](docs/agi-language-alignment-2026-09-30.md)。
 
 ## 当前线上产品
 
