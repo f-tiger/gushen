@@ -9,9 +9,9 @@
 - 数据：Yahoo Finance 复权收盘价（adjclose），约 70 个美股与 ETF，每个美股交易日收盘后重建；数据文件 /data/prices.json（含截止日与数据来源）。
 
 ## 链接
-- 应用：https://gushen-4g2.pages.dev/
+- 应用：https://gushen.agiscorecard.com/
 - 所属板块：https://agiscorecard.com/invest
-- 13F 抄作业实测（按申报日收盘价）：https://agiscorecard.com/does-copying-13f-work
+- 13F 历史模拟（申报后次交易日收盘）：https://agiscorecard.com/does-copying-13f-work
 - 源码：https://github.com/f-tiger/gushen
 
 ## 2026-09-28 方法审计

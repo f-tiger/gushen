@@ -2,7 +2,7 @@
 
 依据用户目标与风险画像，用**确定性优化算法**自动构建/再平衡美股投资组合，用**模拟盘**验证策略，用 **LLM** 做风险画像访谈与组合解读。最终用于指导真实投资。
 
-> **纯前端版已上线（Cloudflare Pages）**：https://gushen-4g2.pages.dev —— 2026-09-27 重构，**不再需要后端**。
+> **纯前端版已上线（Cloudflare Pages）**：https://gushen.agiscorecard.com —— 2026-09-27 重构，**不再需要后端**。
 > 风险画像、6 种组合方法（HRP / 逆波动 / 最小波动 / 最大夏普 / 等权 / 动量）、目标可行性、凯利、杠铃、选股器
 > 全部在浏览器里计算（`frontend/src/engine/`），行情是部署时从 Yahoo 抓的复权收盘价，随站发布为 `/data/prices.json`
 > （标的池见 `scripts/universe.json`，每个美股交易日收盘后自动重建）。与后端 Python 原版的逐项对照测试见

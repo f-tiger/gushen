@@ -107,7 +107,8 @@ export default function App() {
   if (tab === "aggressive") {
     return (
       <div style={{ maxWidth: 640, margin: "40px auto", fontFamily: "system-ui", padding: 16 }}>
-        <h1>股神 · 进攻工具</h1>
+        <nav aria-label="AGI 子站导航" style={{ display: "flex", flexWrap: "wrap", gap: 16, fontSize: 14, marginBottom: 16 }}><a href="https://agiscorecard.com/cn">AGI 首页</a><a href="https://agiscorecard.com/zh/invest">投资研究</a><a href="https://compass.agiscorecard.com/zh/">投资罗盘</a></nav>
+      <h1>股神 · 进攻工具</h1>
         <TabBar tab={tab} setTab={setTab} />
         <AggressiveTools />
         <DataFooter />
@@ -117,6 +118,7 @@ export default function App() {
 
   return (
     <div style={{ maxWidth: 640, margin: "40px auto", fontFamily: "system-ui", padding: 16 }}>
+      <nav aria-label="AGI 子站导航" style={{ display: "flex", flexWrap: "wrap", gap: 16, fontSize: 14, marginBottom: 16 }}><a href="https://agiscorecard.com/cn">AGI 首页</a><a href="https://agiscorecard.com/zh/invest">投资研究</a><a href="https://compass.agiscorecard.com/zh/">投资罗盘</a></nav>
       <h1>股神 · AI 智能投顾</h1>
       <TabBar tab={tab} setTab={setTab} />
       <p style={{ color: "#666" }}>
