@@ -1,3 +1,4 @@
+import { t as translate } from "../locale";
 import { optimize } from "./optimizer";
 import { Frame, mean, std, TRADING_DAYS } from "./stats";
 
@@ -52,7 +53,7 @@ export function backtest(
     lookbackWindow < 3 ||
     T <= lookbackWindow + 1
   )
-    throw new Error("历史数据长度不足以覆盖回测窗口");
+    throw new Error(translate("历史数据长度不足以覆盖回测窗口"));
   if (
     !Number.isFinite(initial) ||
     initial <= 0 ||
@@ -60,7 +61,7 @@ export function backtest(
     costBps < 0 ||
     costBps >= 5000
   )
-    throw new Error("本金和成本参数无效");
+    throw new Error(translate("本金和成本参数无效"));
   if (
     f.cols.length < 2 ||
     f.px.length !== f.cols.length ||
@@ -73,9 +74,9 @@ export function backtest(
         !/^\d{4}-\d{2}-\d{2}$/.test(d) || (i > 0 && d <= f.dates[i - 1]),
     )
   )
-    throw new Error("价格帧必须按日期递增、完整对齐且价格为正");
+    throw new Error(translate("价格帧必须按日期递增、完整对齐且价格为正"));
   const every = options.rebalanceMonths ?? 1;
-  if (![1, 3].includes(every)) throw new Error("换仓周期无效");
+  if (![1, 3].includes(every)) throw new Error(translate("换仓周期无效"));
   if (
     options.fixedWeights &&
     (Object.keys(options.fixedWeights).length !== f.cols.length ||
@@ -88,7 +89,7 @@ export function backtest(
         Object.values(options.fixedWeights).reduce((a, b) => a + b, 0) - 1,
       ) > 1e-8)
   )
-    throw new Error("固定权重必须覆盖标的且合计 100%");
+    throw new Error(translate("固定权重必须覆盖标的且合计 100%"));
   const bucket = (d: string) =>
     Math.floor(
       (Number(d.slice(0, 4)) * 12 + Number(d.slice(5, 7)) - 1) / every,
@@ -120,7 +121,7 @@ export function backtest(
         !(total > 0) ||
         Object.values(raw).some((v) => !Number.isFinite(v) || v < 0)
       )
-        throw new Error("目标权重无效");
+        throw new Error(translate("目标权重无效"));
       const target = f.cols.map((c) => (raw[c] || 0) / total);
       const turnover = target.reduce(
         (sum, w, i) => sum + Math.abs(w - positions[i] / nav),

@@ -23,3 +23,8 @@ walk-forward-close-v2：HRP 仅用执行前 126 个收盘价；初次在预热�
 - 数据文件：https://gushen.agiscorecard.com/data/prices.json
 - 源码：https://github.com/f-tiger/gushen
 - 产品设计与调研：https://github.com/f-tiger/gushen/blob/claude/skills-prompt-workflow-lb8d7j/docs/product-workbench-2026-09-29.md
+
+## Languages and theme
+- English: https://gushen.agiscorecard.com/en/ — AGI English dark theme; complete English interface and reports.
+- 简体中文：https://gushen.agiscorecard.com/zh/ — 与 AGI 中文站一致的浅色主题。
+- Switching language preserves the in-memory research configuration, results and journal. User-authored notes are not translated. Both routes include localized static metadata and reciprocal hreflang.

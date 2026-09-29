@@ -1,3 +1,4 @@
+import { t } from "../locale";
 // 带上下界的单纯形上的两个优化问题，替代后端 PyPortfolioOpt(cvxpy) 的求解器：
 //   min_volatility： min w'Σw          s.t. Σw=1, lo ≤ w ≤ hi   （凸二次规划）
 //   max_sharpe：     max μ'w/√(w'Σw)   s.t. 同上                 （拟凹；KKT 点即全局最优）
@@ -7,11 +8,18 @@
 import { dot, quad } from "./stats";
 
 /** 把向量 v 投影到 {Σw = 1, lo ≤ w_i ≤ hi}（欧氏距离最近点）。不可行时抛错。 */
-export function projectBoundedSimplex(v: number[], lo: number, hi: number): number[] {
+export function projectBoundedSimplex(
+  v: number[],
+  lo: number,
+  hi: number,
+): number[] {
   const n = v.length;
   if (lo * n > 1 + 1e-12 || hi * n < 1 - 1e-12) {
     throw new Error(
-      `权重上限 ${(hi * 100).toFixed(0)}% × ${n} 个标的不足 100%，约束无解；请增加标的或放宽上限`
+      t("权重上限 {0}% × {1} 个标的不足 100%，约束无解；请增加标的或放宽上限", [
+        (hi * 100).toFixed(0),
+        n,
+      ]),
     );
   }
   const clip = (x: number) => Math.min(hi, Math.max(lo, x));
@@ -46,7 +54,7 @@ export function minVolatility(S: number[][], lo: number, hi: number): number[] {
     const wNew = projectBoundedSimplex(
       y.map((yi, i) => yi - g[i] / L),
       lo,
-      hi
+      hi,
     );
     const tNew = (1 + Math.sqrt(1 + 4 * tk * tk)) / 2;
     y = wNew.map((x, i) => x + ((tk - 1) / tNew) * (x - w[i]));
@@ -58,10 +66,18 @@ export function minVolatility(S: number[][], lo: number, hi: number): number[] {
   return w;
 }
 
-export function maxSharpe(mu: number[], S: number[][], lo: number, hi: number, rf = 0): number[] {
+export function maxSharpe(
+  mu: number[],
+  S: number[][],
+  lo: number,
+  hi: number,
+  rf = 0,
+): number[] {
   const ex = mu.map((m) => m - rf);
   if (!ex.some((m) => m > 0)) {
-    throw new Error("至少要有一个标的的历史期望收益高于无风险利率，最大夏普无解");
+    throw new Error(
+      t("至少要有一个标的的历史期望收益高于无风险利率，最大夏普无解"),
+    );
   }
   const n = mu.length;
   const sharpe = (w: number[]) => {
@@ -94,7 +110,11 @@ export function maxSharpe(mu: number[], S: number[][], lo: number, hi: number, r
       const g = grad(w);
       let moved = false;
       while (step > 1e-12) {
-        const cand = projectBoundedSimplex(w.map((x, i) => x + step * g[i]), lo, hi);
+        const cand = projectBoundedSimplex(
+          w.map((x, i) => x + step * g[i]),
+          lo,
+          hi,
+        );
         const cv = sharpe(cand);
         if (cv > val + 1e-15) {
           const diff = Math.max(...cand.map((x, i) => Math.abs(x - w[i])));

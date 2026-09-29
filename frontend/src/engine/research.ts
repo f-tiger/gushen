@@ -1,3 +1,4 @@
+import { t } from "../locale";
 import { frameFor, type PriceFile } from "./data";
 import {
   covMatrix,
@@ -81,40 +82,40 @@ const object = (v: unknown): v is Record<string, unknown> =>
 const number = (v: unknown, lo: number, hi: number) =>
   typeof v === "number" && Number.isFinite(v) && v >= lo && v <= hi;
 export function validateConfig(value: unknown): ResearchConfig {
-  if (!object(value)) throw new Error("配置格式不正确");
+  if (!object(value)) throw new Error(t("配置格式不正确"));
   const v = value;
   if (typeof v.name !== "string" || !v.name.trim() || v.name.length > 80)
-    throw new Error("研究名称须为 1–80 个字符");
+    throw new Error(t("研究名称须为 1–80 个字符"));
   if (
     !Array.isArray(v.holdings) ||
     v.holdings.length < 2 ||
     v.holdings.length > 10
   )
-    throw new Error("请保留 2–10 个标的");
+    throw new Error(t("请保留 2–10 个标的"));
   const holdings = v.holdings.map((h) => {
     if (
       !object(h) ||
       typeof h.symbol !== "string" ||
       !number(h.weight, 0.01, 100)
     )
-      throw new Error("每个标的的权重须大于 0 且不超过 100%");
+      throw new Error(t("每个标的的权重须大于 0 且不超过 100%"));
     const symbol = h.symbol.trim().toUpperCase().replace(/\./g, "-");
     if (!/^[A-Z0-9-]{1,10}$/.test(symbol))
-      throw new Error("请输入有效的标的代码");
+      throw new Error(t("请输入有效的标的代码"));
     return { symbol, weight: h.weight as number };
   });
   if (new Set(holdings.map((h) => h.symbol)).size !== holdings.length)
-    throw new Error("标的不能重复");
+    throw new Error(t("标的不能重复"));
   if (Math.abs(holdings.reduce((s, h) => s + h.weight, 0) - 100) > 0.005)
-    throw new Error("权重合计须为 100%，可使用「平均分配」");
+    throw new Error(t("权重合计须为 100%，可使用「平均分配」"));
   if (!number(v.capital, 100, 1e10))
-    throw new Error("模拟本金须在 100–100 亿美元之间");
+    throw new Error(t("模拟本金须在 100–100 亿美元之间"));
   if (![365, 730, 1095, 1460].includes(v.historyDays as number))
-    throw new Error("历史窗口无效");
+    throw new Error(t("历史窗口无效"));
   if (!number(v.costBps, 0, 100))
-    throw new Error("单边交易成本须在 0–100 基点之间");
+    throw new Error(t("单边交易成本须在 0–100 基点之间"));
   if (v.rebalanceMonths !== 1 && v.rebalanceMonths !== 3)
-    throw new Error("换仓频率无效");
+    throw new Error(t("换仓频率无效"));
   return {
     name: v.name.trim(),
     holdings,
@@ -126,18 +127,18 @@ export function validateConfig(value: unknown): ResearchConfig {
 }
 export function readWorkspace(text: string): Workspace {
   if (text.length > 2_000_000)
-    throw new Error("文件超过 2 MB，请导入研究配置 JSON");
+    throw new Error(t("文件超过 2 MB，请导入研究配置 JSON"));
   let raw: unknown;
   try {
     raw = JSON.parse(text);
   } catch {
-    throw new Error("无法读取 JSON 文件");
+    throw new Error(t("无法读取 JSON 文件"));
   }
   if (!object(raw) || raw.version !== 1)
-    throw new Error("不支持的研究文件版本");
+    throw new Error(t("不支持的研究文件版本"));
   const config = validateConfig(raw.config);
   if (!Array.isArray(raw.journal) || raw.journal.length > 50)
-    throw new Error("日志格式无效，最多保存 50 条");
+    throw new Error(t("日志格式无效，最多保存 50 条"));
   const journal: JournalEntry[] = raw.journal.map((x) => {
     if (
       !object(x) ||
@@ -152,7 +153,7 @@ export function readWorkspace(text: string): Workspace {
       ].every((k) => typeof x[k] === "string") ||
       !["open", "reviewed"].includes(String(x.status))
     )
-      throw new Error("日志记录格式无效");
+      throw new Error(t("日志记录格式无效"));
     const j = x as unknown as JournalEntry;
     if (
       j.id.length > 100 ||
@@ -163,9 +164,9 @@ export function readWorkspace(text: string): Workspace {
       !/^\d{4}-\d{2}-\d{2}$/.test(j.reviewDate) ||
       !Number.isFinite(Date.parse(j.createdAt))
     )
-      throw new Error("日志字段过长或日期无效");
+      throw new Error(t("日志字段过长或日期无效"));
     if (j.evidence && !/^https?:\/\//i.test(j.evidence))
-      throw new Error("证据链接只支持 http 或 https");
+      throw new Error(t("证据链接只支持 http 或 https"));
     return {
       id: j.id,
       title: j.title,
@@ -178,7 +179,7 @@ export function readWorkspace(text: string): Workspace {
     };
   });
   if (new Set(journal.map((j) => j.id)).size !== journal.length)
-    throw new Error("日志编号重复");
+    throw new Error(t("日志编号重复"));
   return { version: 1, config, journal };
 }
 export interface RiskView {
@@ -272,11 +273,11 @@ export function stressImpact(
   capital: number,
 ) {
   if (!Number.isFinite(capital) || capital <= 0)
-    throw new Error("模拟本金无效");
+    throw new Error(t("模拟本金无效"));
   const parts = holdings.map((h) => {
     const shock = shocks[h.symbol] ?? 0;
     if (!Number.isFinite(shock) || shock < -100 || shock > 200)
-      throw new Error("冲击假设须在 -100%–200% 之间");
+      throw new Error(t("冲击假设须在 -100%–200% 之间"));
     return {
       symbol: h.symbol,
       shock,
@@ -302,7 +303,7 @@ export function contributionProjection(
     annual <= -1 ||
     annual > 1
   )
-    throw new Error("请检查本金、月投入、年限（不超过 50 年）和年增长率");
+    throw new Error(t("请检查本金、月投入、年限（不超过 50 年）和年增长率"));
   const months = Math.round(years * 12),
     rate = (1 + annual) ** (1 / 12) - 1;
   let value = initial;
@@ -348,11 +349,11 @@ export function runResearch(
   const { frame, skipped } = frameFor(prices, symbols, config.historyDays);
   if (skipped.length)
     throw new Error(
-      "当前数据不包含 " + skipped.join("、") + "，请更换标的后再运行",
+      t("当前数据不包含 ") + skipped.join("、") + t("，请更换标的后再运行"),
     );
   const lookback = 126;
   if (frame.dates.length < lookback + 21)
-    throw new Error("共同历史不足：至少需要 126 日预热和 21 个可比较交易日");
+    throw new Error(t("共同历史不足：至少需要 126 日预热和 21 个可比较交易日"));
   const total = config.holdings.reduce((s, h) => s + h.weight, 0),
     fixedWeights = Object.fromEntries(
       config.holdings.map((h) => [h.symbol, h.weight / total]),
@@ -360,12 +361,17 @@ export function runResearch(
   const kinds = [
     {
       id: "custom",
-      name: "我的目标权重",
+      name: t("我的目标权重"),
       color: "#173f68",
       method: "equal_weight",
     },
-    { id: "equal", name: "同池等权", color: "#ae711b", method: "equal_weight" },
-    { id: "hrp", name: "层次风险平价", color: "#127d78", method: "hrp" },
+    {
+      id: "equal",
+      name: t("同池等权"),
+      color: "#ae711b",
+      method: "equal_weight",
+    },
+    { id: "hrp", name: t("层次风险平价"), color: "#127d78", method: "hrp" },
   ];
   const strategies = kinds.map((k) => ({
     id: k.id,
@@ -391,11 +397,11 @@ export function runResearch(
   };
   const stale = (prices.stale ?? []).filter((s) => symbols.includes(s));
   const warnings = [
-    "按当前标的池回看历史，存在选择与幸存者偏差；不是实盘业绩。",
-    "计入指定单边交易成本；税、额外滑点、现金利息与汇率未建模。",
+    t("按当前标的池回看历史，存在选择与幸存者偏差；不是实盘业绩。"),
+    t("计入指定单边交易成本；税、额外滑点、现金利息与汇率未建模。"),
   ];
   if (stale.length)
-    warnings.unshift("沿用上一版行情：" + stale.join("、") + "。");
+    warnings.unshift(t("沿用上一版行情：") + stale.join("、") + "。");
   return {
     config,
     source: {

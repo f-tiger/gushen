@@ -11,11 +11,11 @@ let failure;
 for(let attempt=1;attempt<=12;attempt++) {
  try {
   const html=await read('/');
-  if(!html.includes(`rel="canonical" href="${root}/"`))throw new Error('new canonical not live');
+  if(!html.includes(`rel="canonical" href="${root}/en/"`))throw new Error('new canonical not live');
   const src=html.match(/<script[^>]+src="([^"]+\.js)"/)?.[1];
   const bundle=src ? await read(src) : '';
-  if(!['walk-forward-close-v2','gushen-research-workspace-v1','风险透视','研究日志'].every(marker=>bundle.includes(marker)))throw new Error('research workbench bundle missing');
-  if(!html.includes('投资研究工作台'))throw new Error('workbench metadata missing');
+  if(!['walk-forward-close-v2','gushen-research-workspace-v1','风险透视','研究日志','Language / 语言'].every(marker=>bundle.includes(marker)))throw new Error('research workbench bundle missing');
+  for(const [lang,title] of [['en','Portfolio Research Workbench'],['zh','投资研究工作台']]){const localized=await read('/'+lang+'/');if(!localized.includes(title)||!localized.includes(`rel="canonical" href="${root}/${lang}/"`)||!localized.includes('hreflang="zh-Hans"'))throw new Error(lang+' localization missing');}
   const data=JSON.parse(await read('/data/prices.json'));
   if(data.generated!==expected)throw new Error('price snapshot differs');
   const cutoff=completedDateCutoff(new Date(data.generated));

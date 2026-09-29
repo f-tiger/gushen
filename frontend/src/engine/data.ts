@@ -1,3 +1,4 @@
+import { t } from "../locale";
 // 行情数据层 —— 替代后端 services/market（yfinance）。
 // 数据来自随站点一起发布的静态文件 /data/prices.json，由 GitHub Actions 每个交易日收盘后
 // 用 Yahoo 复权收盘价重建（scripts/build-prices.mjs）。浏览器不直连任何行情接口。
@@ -18,10 +19,13 @@ export interface PriceFile {
 
 let cache: Promise<PriceFile> | null = null;
 
-export function loadPrices(url = `${import.meta.env.BASE_URL}data/prices.json`): Promise<PriceFile> {
+export function loadPrices(
+  url = `${import.meta.env.BASE_URL}data/prices.json`,
+): Promise<PriceFile> {
   if (!cache) {
     cache = fetch(url).then(async (r) => {
-      if (!r.ok) throw new Error(`行情数据文件读取失败（HTTP ${r.status}）`);
+      if (!r.ok)
+        throw new Error(t("行情数据文件读取失败（HTTP {0}）", [r.status]));
       return (await r.json()) as PriceFile;
     });
     cache.catch(() => {
@@ -56,7 +60,11 @@ export function normalize(symbols: string[]): string[] {
 }
 
 /** 单标的序列（去缺失），同后端 _load_series。 */
-export function seriesFor(p: PriceFile, symbol: string, lookbackDays: number): number[] | null {
+export function seriesFor(
+  p: PriceFile,
+  symbol: string,
+  lookbackDays: number,
+): number[] | null {
   const col = p.close[symbol];
   if (!col) return null;
   const start = startIso(p.asOf, lookbackDays);
@@ -70,19 +78,29 @@ export function seriesFor(p: PriceFile, symbol: string, lookbackDays: number): n
 
 /** 多标的对齐价格帧（按交易日取交集），同后端 _load_prices：
  *  数据里没有的代码跳过并报告；可用的少于 2 个就报错。 */
-export function frameFor(p: PriceFile, symbols: string[], lookbackDays: number): { frame: Frame; skipped: string[] } {
+export function frameFor(
+  p: PriceFile,
+  symbols: string[],
+  lookbackDays: number,
+): { frame: Frame; skipped: string[] } {
   const syms = normalize(symbols);
   const have = syms.filter((s) => p.close[s]);
   const skipped = syms.filter((s) => !p.close[s]);
   if (have.length < 2) {
     throw new Error(
-      `可用行情标的不足 2 个，无法优化。` + (skipped.length ? `数据集里没有：${skipped.join(", ")}。` : "") + "可选代码见页面底部。"
+      t("可用行情标的不足 2 个，无法优化。") +
+        (skipped.length ? t("数据集里没有：{0}。", [skipped.join(", ")]) : "") +
+        t("可选代码见页面底部。"),
     );
   }
   const start = startIso(p.asOf, lookbackDays);
   const rows: number[] = [];
   p.dates.forEach((d, i) => {
-    if (d >= start && have.every((s) => p.close[s][i] !== null && p.close[s][i] !== undefined)) rows.push(i);
+    if (
+      d >= start &&
+      have.every((s) => p.close[s][i] !== null && p.close[s][i] !== undefined)
+    )
+      rows.push(i);
   });
   const frame: Frame = {
     dates: rows.map((i) => p.dates[i]),
