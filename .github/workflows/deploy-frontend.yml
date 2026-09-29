@@ -49,7 +49,7 @@ jobs:
         run: npm test
 
       - name: Validate domain setup safeguards
-        run: node --test scripts/attach-agi-domain.test.mjs
+        run: node --test scripts/attach-agi-domain.test.mjs scripts/completed-session.test.mjs
 
       - name: Attach Gushen to the AGI subdomain
         if: github.event_name != 'schedule'
