@@ -1,15 +1,38 @@
-# 股神 Gushen · AI 智能投顾（美股）
+# 股神 Gushen · 投资研究工作台
 
-依据用户目标与风险画像，用**确定性优化算法**自动构建/再平衡美股投资组合，用**模拟盘**验证策略，用 **LLM** 做风险画像访谈与组合解读。最终用于指导真实投资。
+线上应用：**https://gushen.agiscorecard.com/** · [AGI 投资研究](https://agiscorecard.com/zh/invest)
 
-> **纯前端版已上线（Cloudflare Pages）**：https://gushen.agiscorecard.com —— 2026-09-27 重构，**不再需要后端**。
-> 风险画像、6 种组合方法（HRP / 逆波动 / 最小波动 / 最大夏普 / 等权 / 动量）、目标可行性、凯利、杠铃、选股器
-> 全部在浏览器里计算（`frontend/src/engine/`），行情是部署时从 Yahoo 抓的复权收盘价，随站发布为 `/data/prices.json`
-> （标的池见 `scripts/universe.json`，每个美股交易日收盘后自动重建）。与后端 Python 原版的逐项对照测试见
-> `frontend/src/engine/crosscheck.test.ts`。`backend/` 保留作参考与对照基准，线上不用它。
-> 数据源提醒：Yahoo 行情在其条款下属个人/原型用途，对外商用或再分发需要付费授权（同 `docs/research.md` 的原有结论）。
+面向中文美股 / ETF 自主研究者，把「建立组合 → 同窗比较 → 风险解释 → 情景推演 → 保存复盘」连成可复查的工作流。研究用户自己的假设，不提供交易执行或收益承诺。
 
-> ⚠️ 本项目为信息/教育用途，输出不构成投资建议。数据源与合规存在硬约束，详见 `docs/`。
+## 当前线上产品
+
+- **组合总览**：2–10 个标的，自定义目标权重、美元本金、历史窗口、单边成本和月 / 季度换仓。3 组学习示例并非投资推荐。
+- **策略比较**：固定目标权重、同池等权、HRP；同一执行窗口，净值 / 回撤图、月收益、期末漂移权重与换仓账本。
+- **风险透视**：集中度、有效持仓数、相关矩阵、目标权重的方差贡献与水下期。
+- **情景推演**：自定义价格冲击、每月末投入的确定性复利测算。所有增长率均为用户假设。
+- **研究日志**：保存论点、反证、来源链接与复查日期。本机保存、JSON 导入导出、完整报告和打印 / PDF；无账户或自动提醒。
+- **工具箱**：保留原风险问卷与专项计算；模板解读不调用 LLM。
+
+React + TypeScript + Vite，浏览器内完成计算，不上传研究输入。静态价格快照由 GitHub Actions 重建并随 Cloudflare Pages 发布。生产分支为 `claude/skills-prompt-workflow-lb8d7j`；`backend/` 是历史参考实现，不运行在线上。
+
+价格使用 Yahoo 复权收盘数据。纽约时间 17:00 前过滤当日未完成日线，包括旧数据回退路径。支持范围见 `scripts/universe.json`，数据截止日、生成时间和沿用旧列标记均在页面显示。数据使用权需按实际用途单独评估。
+
+```bash
+npm ci --prefix frontend
+npm test --prefix frontend
+node --test scripts/attach-agi-domain.test.mjs scripts/completed-session.test.mjs
+# 本地开发先生成 frontend/public/data/prices.json，或下载线上公开快照。
+npm run dev --prefix frontend
+npm run build --prefix frontend
+```
+
+研究配置与最多 50 条日志只保存在本机浏览器，建议导出备份。情景推演的临时输入不会写入报告；要保留假设请记入日志。当前标的池仍有选择与幸存者偏差，历史模拟不是实盘业绩。教育研究用途，不构成投资建议。
+
+产品深化与三轮 Prompt：[设计、依据和范围](docs/product-workbench-2026-09-29.md)。
+
+## 历史架构与参考实现
+
+下文保留原后端原型的设计与启动资料；并非当前线上部署拓扑。
 
 ## 文档
 

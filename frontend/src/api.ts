@@ -53,7 +53,7 @@ export async function screenStocks(
   const candidates = screen(series, 10, mode);
   const base =
     mode === "multibagger"
-      ? "multibagger 模式：基于 464 只 10 倍股实证，奖励远离高点、弱化短动量；本版无基本面数据，未融合 FCF yield，只按价格评分。"
+      ? "回撤与趋势模式：奖励远离高点、弱化短动量；仅按价格规则评分，未使用基本面数据，分数不是上涨概率。"
       : "momentum 模式：追当前上行强度，非预测；高分通常高波动。";
   return { mode, candidates, note: base + " 集中押注上行大、下行也大。" + skippedNote(skipped) };
 }

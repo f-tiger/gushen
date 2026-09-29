@@ -9,6 +9,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { completedDateCutoff, completedRows } from './completed-session.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const out = join(root, "frontend", "public", "data", "prices.json");
@@ -16,6 +17,7 @@ const uni = JSON.parse(readFileSync(join(root, "scripts", "universe.json"), "utf
 const symbols = [...uni.etf, ...uni.stock];
 const UA = "Mozilla/5.0 (X11; Linux x86_64) gushen-price-builder/1.0 (+https://github.com/f-tiger/gushen)";
 const KEEP_DAYS = 4 * 366;
+const completedCutoff = completedDateCutoff();
 
 async function prev() {
   if (process.env.PREV_URL) {
@@ -44,7 +46,7 @@ async function fetchOne(sym) {
       if (!ts || !adj || ts.length !== adj.length) return { error: "no adjclose series" };
       const gmt = res.meta?.gmtoffset ?? 0; // 交易所本地日期
       const rows = ts.map((t, i) => [new Date((t + gmt) * 1000).toISOString().slice(0, 10), adj[i]]);
-      return { rows: rows.filter(([, v]) => typeof v === "number" && Number.isFinite(v) && v > 0) };
+      return { rows: completedRows(rows, completedCutoff) };
     } catch (e) {
       if (attempt === 4) return { error: e.message };
       await new Promise((ok) => setTimeout(ok, 1500 * attempt));
@@ -62,7 +64,7 @@ for (const s of symbols) {
   else {
     const col = previous?.close?.[s];
     if (col) {
-      got[s] = new Map(previous.dates.map((d, i) => [d, col[i]]).filter(([, v]) => v !== null));
+      got[s] = new Map(completedRows(previous.dates.map((d, i) => [d, col[i]]), completedCutoff));
       stale.push(s);
     } else failed.push(s);
     console.log(`  ${s}: ${r.error}${col ? " → 沿用上一版" : " → 无上一版可用"}`);
@@ -90,7 +92,7 @@ writeFileSync(
   JSON.stringify({
     asOf,
     generated: new Date().toISOString(),
-    source: "Yahoo Finance 复权收盘价（adjclose），每个交易日收盘后重建",
+    source: "Yahoo Finance 复权收盘价（adjclose），纽约时间 17:00 前排除当日未完成日线",
     dates,
     close,
     stale,
