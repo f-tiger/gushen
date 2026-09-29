@@ -4,7 +4,7 @@
 
 import { hrpWeights } from "./hrp";
 import { ledoitWolf } from "./ledoitWolf";
-import { maxSharpe, minVolatility } from "./solver";
+import { maxSharpe, minVolatility, projectBoundedSimplex } from "./solver";
 import { covMatrix, dot, Frame, mean, pctChange, quad, round, std, TRADING_DAYS } from "./stats";
 
 export const METHODS = ["hrp", "inverse_vol", "min_volatility", "max_sharpe", "equal_weight", "momentum"] as const;
@@ -112,7 +112,14 @@ export function optimize(
   else if (method === "momentum") raw = momentumWeights(f);
   else raw = pypfoptOptimize(f, method as Method, weightBounds);
 
-  const weights = clean(raw);
+  if (!weightBounds.every(Number.isFinite) || weightBounds[0] < 0 || weightBounds[1] > 1 || weightBounds[0] > weightBounds[1]) throw new Error("权重边界无效");
+  const cleaned = clean(raw);
+  // HRP/inverse-vol/momentum historically ignored profile caps. Constrain the
+  // final weights for every method; retain full precision so rounding cannot
+  // push a capped weight above the limit.
+  const bounded = weightBounds[0] !== 0 || weightBounds[1] !== 1;
+  const values = bounded ? projectBoundedSimplex(f.cols.map(c => cleaned[c] || 0), ...weightBounds) : null;
+  const weights = values ? Object.fromEntries(f.cols.map((c, i) => [c, values[i]])) : cleaned;
   const [r, v, s] = performance(weights, f, riskFree);
   return {
     method,
@@ -122,3 +129,4 @@ export function optimize(
     sharpe_ratio: round(s, 4),
   };
 }
+

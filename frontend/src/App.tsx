@@ -128,7 +128,7 @@ export default function App() {
       <div style={{ border: "1px solid #ddd", borderRadius: 8, padding: 16, marginBottom: 24 }}>
         <h3 style={{ marginTop: 0 }}>目标可行性分析</h3>
         <p style={{ color: "#666", marginTop: 0 }}>
-          诚实地算出达成目标所需的年化收益与概率——不粉饰。
+          计算目标所需收益，比较同一标的池的历史模拟，并查看明确假设下的情景概率。
         </p>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "flex-end" }}>
           <label>
@@ -154,15 +154,32 @@ export default function App() {
         {goal && (
           <div style={{ marginTop: 12 }}>
             <p style={{ fontSize: 18 }}>
-              需要年化 <b>{(goal.required_cagr * 100).toFixed(0)}%</b> · 达成概率{" "}
+              需要年化 <b>{(goal.required_cagr * 100).toFixed(0)}%</b> · 模型情景概率{" "}
               <b>{(goal.prob_success * 100).toFixed(2)}%</b> · 判定{" "}
               <b style={{ color: VERDICT_CN[goal.verdict]?.color }}>
                 {VERDICT_CN[goal.verdict]?.label ?? goal.verdict}
               </b>
             </p>
             <p style={{ color: "#444" }}>{goal.message}</p>
+            <div style={{ border: '1px solid #ccc', borderRadius: 8, padding: 12, overflowX: 'auto' }}>
+              <b>历史验证账本 · {goal.evaluation.method_version}</b>
+              <p style={{ fontSize: 13 }}>{goal.evaluation.from} → {goal.evaluation.to} · 每笔成交额成本 {goal.evaluation.cost_bps} 基点 · 未计税费、额外滑点和终止清仓成本。</p>
+              <table style={{ width: '100%', fontSize: 13, textAlign: 'right' }}>
+                <thead><tr><th scope="col">同一标的池</th><th scope="col">累计</th><th scope="col">年化</th><th scope="col">最大回撤</th></tr></thead>
+                <tbody>{[['HRP', goal.evaluation], ['等权基准', goal.equalWeight]].map(([label, raw]) => {
+                  const m = raw as typeof goal.evaluation;
+                  return <tr key={String(label)}><th scope="row">{String(label)}</th><td>{(m.total_return * 100).toFixed(2)}%</td><td>{(m.cagr * 100).toFixed(2)}%</td><td>{(m.max_drawdown * 100).toFixed(2)}%</td></tr>;
+                })}</tbody>
+              </table>
+              <p style={{ fontSize: 13 }}>用前一交易日及更早数据形成权重，在月内首个可用交易日收盘换仓；期间持仓随价格漂移。当前标的池仍存在选择与幸存者偏差；这不是实盘业绩或经校准的未来成功率。</p>
+              {!!goal.skipped.length && <p>未纳入：{goal.skipped.join('、')}</p>}
+              <button type="button" onClick={() => {
+                const url = URL.createObjectURL(new Blob([JSON.stringify(goal, null, 2)], { type: 'application/json' }));
+                const a = document.createElement('a'); a.href = url; a.download = 'gushen-research-audit.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+              }}>下载方法、换仓日期与成本账本</button>
+            </div>
             <p style={{ color: "#666", fontSize: 13 }}>
-              {goal.years} 年后预测区间（基于该标的池 HRP 回测的历史 μ/σ）：中位 ¥{goal.projection.median.toLocaleString()} ·
+              {goal.years} 年后模型区间（假设历史算术收益与波动参数保持不变）：中位 ¥{goal.projection.median.toLocaleString()} ·
               5% 分位 ¥{goal.projection.p5.toLocaleString()} · 95% 分位 ¥{goal.projection.p95.toLocaleString()}
             </p>
           </div>
@@ -224,7 +241,7 @@ export default function App() {
             </tbody>
           </table>
           <p style={{ color: "#666", marginTop: 8 }}>
-            历史估算：年化收益 {(result.portfolio.expected_annual_return * 100).toFixed(1)}% ·
+            样本内拟合（不是回测）：历史年化均值 {(result.portfolio.expected_annual_return * 100).toFixed(1)}% ·
             波动 {(result.portfolio.annual_volatility * 100).toFixed(1)}% · 夏普{" "}
             {result.portfolio.sharpe_ratio.toFixed(2)}
             <br />
@@ -245,3 +262,4 @@ export default function App() {
     </div>
   );
 }
+
