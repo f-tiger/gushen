@@ -76,6 +76,9 @@ jobs:
           assert all(len(v) == days for v in d["close"].values()), "ragged columns"
           PY
 
+      - name: Check research calculations against the actual price snapshot
+        run: node frontend/scripts/check-research-snapshot.mjs
+
       - name: Build site
         working-directory: frontend
         run: npm run build
