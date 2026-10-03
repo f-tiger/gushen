@@ -242,6 +242,9 @@ export default function App() {
             )),
           )}
         </nav>
+        <a className="nav-item" href={getLanguage() === "en" ? "https://agiscorecard.com/portfolio-tracker?utm_source=gushen&utm_medium=product" : "https://agiscorecard.com/zh/portfolio-tracker?utm_source=gushen&utm_medium=product"}>
+          {getLanguage() === "en" ? "Public tracker · 12 stocks / SPY / TQQQ" : "公开追踪 · 12 股 / 标普 / TQQQ"}
+        </a>
         <div className="sidebar-bottom">
           <span className="status-dot" />
           {t("浏览器内计算")}
