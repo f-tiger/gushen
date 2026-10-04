@@ -268,8 +268,21 @@ button.primary:hover {
     width: 8px;
     height: 8px;
   }
+  .topbar {
+    flex-wrap: wrap;
+    height: auto;
+    gap: 8px;
+    padding-block: 8px;
+  }
   .topbar .breadcrumb {
-    display: none;
+    display: flex;
+    align-items: center;
+    max-width: none;
+  }
+  .topbar .breadcrumb > a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
   }
   .top-actions {
     width: 100%;

@@ -269,7 +269,7 @@ export default function App() {
         <header className="topbar" data-fleet-header="fleet-header-20261004.1">
           <div className="breadcrumb">
             <a href={localizedLink("https://agiscorecard.com/cn")}>AGI</a> <span>/</span> {t("投资研究")}
-            <span>/</span> {t("股神")}
+            <span>/</span> <a href={getLanguage() === "en" ? "/en/" : "/zh/"} onClick={(event) => { event.preventDefault(); navigate("overview"); }}>{t("股神")}</a>
           </div>
           <div className="top-actions">
             <LanguageSwitch />
