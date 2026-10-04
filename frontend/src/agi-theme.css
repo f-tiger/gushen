@@ -310,7 +310,8 @@ button.primary:hover {
     display: none;
   }
   .topbar {
-    height: 61px;
+    height: auto;
+    min-height: 61px;
   }
   .top-actions button,
   .file-menu > summary {
