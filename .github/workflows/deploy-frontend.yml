@@ -84,6 +84,12 @@ jobs:
         working-directory: frontend
         run: npm run build
 
+      - name: Verify bilingual header navigation and mobile containment
+        run: |
+          npm install --prefix /tmp/gushen-browser --ignore-scripts --no-audit --no-fund playwright@1.58.2
+          node /tmp/gushen-browser/node_modules/playwright/cli.js install --with-deps --only-shell chromium
+          HEADER_BROWSER_MODULES=/tmp/gushen-browser/node_modules node scripts/check-header-browser.mjs
+
       - name: Ensure Pages project exists
         continue-on-error: true
         env:
