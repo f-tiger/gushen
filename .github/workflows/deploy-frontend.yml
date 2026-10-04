@@ -14,6 +14,7 @@ on:
       - main
     paths:
       - "frontend/**"
+      - "functions/**"
       - "scripts/**"
       - ".github/workflows/deploy-frontend.yml"
   schedule:
@@ -112,3 +113,6 @@ jobs:
 
       - name: Verify the AGI subsite
         run: node scripts/check-agi-domain.mjs
+
+      - name: Verify private fleet account routes
+        run: node frontend/fleet-account/verify-live.mjs gushen.agiscorecard.com

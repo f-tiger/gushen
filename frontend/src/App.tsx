@@ -15,6 +15,7 @@ import WorkbenchChart, { money, pct } from "./WorkbenchChart";
 import { Comparison, Risk, Scenarios, Journal } from "./ResearchViews";
 import LegacyAdvisor from "./LegacyAdvisor";
 import "./workbench.css";
+import FleetAccount from "./FleetAccount";
 import LanguageSwitch, { useLanguage } from "./LanguageSwitch";
 import "./agi-theme.css";
 
@@ -265,13 +266,14 @@ export default function App() {
         </div>
       </aside>
       <div className="main-shell">
-        <header className="topbar">
+        <header className="topbar" data-fleet-header="fleet-header-20261004.1">
           <div className="breadcrumb">
-            AGI <span>/</span> {t("投资研究")}
+            <a href={localizedLink("https://agiscorecard.com/cn")}>AGI</a> <span>/</span> {t("投资研究")}
             <span>/</span> {t("股神")}
           </div>
           <div className="top-actions">
             <LanguageSwitch />
+            <FleetAccount locale={getLanguage()} />
             <span className="save-status">
               {tr(
                 unsaved
