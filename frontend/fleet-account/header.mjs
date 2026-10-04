@@ -26,7 +26,8 @@ function languages(meta,url){
 }
 export function headerTools(meta,url){const copy=accountCopy[locale(meta.lang)]||accountCopy.en;return `<div class="fleet-header-tools">${meta.nativeLanguage?'':languages(meta,url)}<span class="fleet-account-entry"><a href="/auth/account" rel="nofollow">${copy[0]}</a></span></div>`;}
 export const headerCSS=`
-[data-fleet-header]{position:relative;min-width:0;overflow:visible!important}
+[data-fleet-header]{position:relative;min-width:0;height:auto!important;overflow:visible!important}
+header[data-fleet-header],header:has([data-fleet-header]){height:auto!important;min-height:56px}
 [data-fleet-header] .fleet-header-tools{position:relative;display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-inline-start:auto;flex:0 1 auto;min-width:0;font:14px/1.4 system-ui,sans-serif;color:inherit}
 [data-fleet-header] .fleet-account-entry{display:flex;padding:0;margin:0;background:none;color:inherit;font:inherit;min-width:0}
 [data-fleet-header] .fleet-account-entry a{display:block;max-width:180px;min-height:44px;box-sizing:border-box;padding:12px 10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:inherit!important;background:transparent;border:1px solid currentColor;border-radius:6px;font:inherit;text-decoration:none}
