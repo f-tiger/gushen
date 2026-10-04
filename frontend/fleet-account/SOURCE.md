@@ -1,0 +1,1 @@
+Shared source: f-tiger/agi-site tools/fleet-account. Synchronize config.mjs, edge.mjs, nav.mjs and header.mjs together; compare SHA-256 before release. React sites use their native header components. verify-live.mjs is a standalone host-argument adapter. Private account routes stay no-store/noindex and excluded from analytics.
