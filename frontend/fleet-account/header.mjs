@@ -1,8 +1,8 @@
-import {escape,HOSTS} from './config.mjs';
-export const HEADER_VERSION='fleet-header-20261004.1';
+import {escape,HOSTS,accountEntryURL,publicReturnPath} from './config.mjs';
+export const HEADER_VERSION='fleet-header-20261012.1';
 const names={en:'English',de:'Deutsch',fr:'Français',it:'Italiano',es:'Español',nl:'Nederlands',zh:'中文','en-AU':'English (Australia)'};
 export const locale=lang=>lang==='en-AU'?lang:lang?.startsWith('zh')?'zh':(lang||'en').split('-')[0];
-export const accountCopy={en:['Join / Sign in','Account','Signed in: ','Open account'],de:['Anmelden','Konto','Angemeldet: ','Konto öffnen'],fr:['Connexion','Compte','Connecté : ','Ouvrir le compte'],it:['Accedi','Account','Accesso: ','Apri account'],es:['Acceder','Cuenta','Sesión: ','Abrir cuenta'],nl:['Inloggen','Account','Ingelogd: ','Account openen'],zh:['注册 / 登录','账户','已登录：','打开账户']};
+export const accountCopy={en:['Free account','Account','Signed in: ','Open account','Opens in a new tab'],de:['Gratis-Konto','Konto','Angemeldet: ','Konto öffnen','Öffnet einen neuen Tab'],fr:['Compte gratuit','Compte','Connecté : ','Ouvrir le compte','Ouvre un nouvel onglet'],it:['Account gratuito','Account','Accesso: ','Apri account','Si apre in una nuova scheda'],es:['Cuenta gratis','Cuenta','Sesión: ','Abrir cuenta','Se abre en otra pestaña'],nl:['Gratis account','Account','Ingelogd: ','Account openen','Opent in een nieuw tabblad'],zh:['免费账户','账户','已登录：','打开账户','在新标签页打开']};
 const words={en:['Language','Other versions of this page','No other language version is available for this page.','Browse other language content (not a translation of this page)'],de:['Sprache','Andere Versionen dieser Seite','Für diese Seite ist keine andere Sprachversion verfügbar.','Weitere Sprachinhalte (keine Übersetzung dieser Seite)'],fr:['Langue','Autres versions de cette page','Cette page n’a pas d’autre version linguistique.','Autres contenus linguistiques (pas une traduction de cette page)'],it:['Lingua','Altre versioni di questa pagina','Questa pagina non ha altre versioni linguistiche.','Altri contenuti linguistici (non una traduzione di questa pagina)'],es:['Idioma','Otras versiones de esta página','Esta página no tiene otra versión de idioma.','Otros contenidos por idioma (no una traducción de esta página)'],nl:['Taal','Andere versies van deze pagina','Deze pagina heeft geen andere taalversie.','Andere taalinhoud (geen vertaling van deze pagina)'],zh:['语言','本页的其他版本','本页暂无其他语言版本。','浏览其他语言内容（不是本页译文）']};
 export function headerTargets(host){
  if(host==='agiscorecard.com')return ['#agi-nav .agi-header-inner'];
@@ -11,7 +11,7 @@ export function headerTargets(host){
  if(host==='invest.agiscorecard.com')return ['.sunwatch-site-header .sunwatch-header-inner','body > nav[aria-label="披露监控"]','body > nav[aria-label="Research monitor"]'];
  return ['header.top > .wrap','header.site-header','body > header > .wrap','body > header','body > .wrap > header','body > .container > header'];
 }
-export function excludedPath(path){return /(?:^|\/)(?:auth|api|analytics-assets|\.well-known|embed|widgets|members|account)(?:\/|\.|$)/.test(path)||/\/discuss\/(?:account|moderate)/.test(path);}
+export function excludedPath(path){return publicReturnPath(path)===null;}
 export function safeLanguageURL(value,url){try{const u=new URL(value,url);if(u.origin!==url.origin||u.username||u.password||u.search||u.hash||excludedPath(u.pathname))return null;return u.pathname;}catch{return null;}}
 function languages(meta,url){
  const l=locale(meta.lang),t=words[l]||words.en,pairs=new Map();
@@ -24,7 +24,7 @@ function languages(meta,url){
  const extra=entries.length?`<p>${t[3]}</p>${links(entries.map(a=>[locale(a.lang),safeLanguageURL(a.href,url)]),'entry')}`:'';
  return `<details class="fleet-language"><summary aria-label="${t[0]} / Language">${names[l]||escape(meta.lang)} <span aria-hidden="true">⌄</span></summary><div class="fleet-language-panel">${paired}${extra}</div></details>`;
 }
-export function headerTools(meta,url){const copy=accountCopy[locale(meta.lang)]||accountCopy.en;return `<div class="fleet-header-tools">${meta.nativeLanguage?'':languages(meta,url)}<span class="fleet-account-entry"><a href="/auth/account" rel="nofollow">${copy[0]}</a></span></div>`;}
+export function headerTools(meta,url){const copy=accountCopy[locale(meta.lang)]||accountCopy.en;return `<div class="fleet-header-tools">${meta.nativeLanguage?'':languages(meta,url)}<span class="fleet-account-entry"><a data-fleet-account-entry href="${escape(accountEntryURL(url.pathname,meta.lang))}" target="_blank" rel="nofollow noopener noreferrer" title="${escape(copy[4])}" aria-label="${escape(copy[0]+', '+copy[4])}">${copy[0]}</a></span></div>`;}
 export const headerCSS=`
 [data-fleet-header]{position:relative;min-width:0;height:auto!important;overflow:visible!important}
 header[data-fleet-header],header:has([data-fleet-header]){height:auto!important;min-height:56px}

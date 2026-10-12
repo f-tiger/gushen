@@ -1,6 +1,6 @@
 // Public routing allowlist. No wildcard or caller-supplied return URLs.
 export const HUB='https://baipiaoji.com';
-export const VERSION='fleet-account-20261004.1';
+export const VERSION='fleet-account-20261012.1';
 export const HOSTS=new Map([
  ['agiscorecard.com','AGI Scorecard'],['getecoback.com','EcoBack'],['thedollscout.com','The Doll Scout'],
  ['goldrush.agiscorecard.com','GoldRush'],['play.agiscorecard.com','Gridlings'],['source.agiscorecard.com','SourceRadar'],['games.agiscorecard.com','GamesLedger'],
@@ -15,6 +15,21 @@ export const HOSTS=new Map([
 export const TOKEN=/^[A-Za-z0-9_-]{43}$/;
 export const SESSION_COOKIE='__Host-fleet_account';
 export const FLOW_COOKIE='__Host-fleet_flow';
+export const ACCOUNT_LOCALES=['zh','en','de','fr','it','es','nl'];
+export function accountLocale(value){const code=typeof value==='string'?value.toLowerCase().split('-')[0]:'';return ACCOUNT_LOCALES.includes(code)?code:'en';}
+// Only a bounded public pathname is carried through sign-in. Queries, fragments,
+// encoded separators and private/delivery routes never leave the original tool.
+export function publicReturnPath(value){
+ if(typeof value!=='string'||value.length>512||!/^\/[A-Za-z0-9/._~%-]*$/.test(value)||value.includes('//'))return null;
+ try{
+  const decoded=decodeURIComponent(value),u=new URL(value,'https://fleet.invalid');
+  if(u.origin!=='https://fleet.invalid'||u.pathname!==value||u.search||u.hash||/%[0-9a-f]{2}/i.test(decoded)||/%(?:2f|5c)/i.test(value)||/[\\?#\u0000-\u0020\u007f]/.test(decoded))return null;
+  if(decoded.split('/').some(part=>/^(?:auth|api|analytics-assets|\.well-known|member|members|account|accounts|private|share|shared|delivery|download|downloads|packs-thanks|checkout|payment|receipt|order|orders|invoice|invoices|logout|login|register|unsubscribe|admin|go|out|redirect|embed|widget|widgets)(?:[.~-]|$)/i.test(part)||/^__(?:ci|probe|qa)/i.test(part)||part==='.'||part==='..'))return null;
+  if(/^\/(?:[a-z]{2}\/)?(?:discuss\/moderate|studio\/quote-builder)(?:[/.]|$)/i.test(decoded))return null;
+  return value;
+ }catch{return null;}
+}
+export function accountEntryURL(pathname,lang){const q=new URLSearchParams({next:publicReturnPath(pathname)||'/',lang:accountLocale(lang)});return '/auth/account?'+q;}
 export const SESSION_SECONDS=30*86400;
 export const now=()=>Math.floor(Date.now()/1000);
 export const b64=bytes=>btoa(String.fromCharCode(...new Uint8Array(bytes))).replaceAll('+','-').replaceAll('/','_').replace(/=+$/,'');

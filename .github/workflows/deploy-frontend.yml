@@ -33,6 +33,7 @@ jobs:
       deployments: write
     env:
       SITE: https://gushen-4g2.pages.dev
+      OUTCOME_READ_ONLY_RELEASE: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[outcome-readonly-release]') }}
     steps:
       - uses: actions/checkout@v4
 
@@ -53,7 +54,7 @@ jobs:
         run: node --test scripts/attach-agi-domain.test.mjs scripts/completed-session.test.mjs
 
       - name: Attach Gushen to the AGI subdomain
-        if: github.event_name != 'schedule'
+        if: ${{ env.OUTCOME_READ_ONLY_RELEASE != 'true' && (github.event_name != 'schedule') }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: node scripts/attach-agi-domain.mjs
@@ -61,7 +62,16 @@ jobs:
       - name: Build price data (Yahoo adjusted closes)
         env:
           PREV_URL: ${{ env.SITE }}/data/prices.json
-        run: node scripts/build-prices.mjs
+        run: |
+          if [ "$OUTCOME_READ_ONLY_RELEASE" = "true" ]; then
+            # Account-only release: preserve the current published snapshot byte-for-byte.
+            mkdir -p frontend/public/data
+            curl --fail --show-error --silent --max-time 30 \
+              -A 'FleetRegistrationProbe/1.0 (read-only existing public price snapshot)' \
+              "$PREV_URL" -o frontend/public/data/prices.json
+          else
+            node scripts/build-prices.mjs
+          fi
 
       - name: Sanity-check the data before publishing
         run: |
@@ -91,6 +101,7 @@ jobs:
           HEADER_BROWSER_MODULES=/tmp/gushen-browser/node_modules node scripts/check-header-browser.mjs
 
       - name: Ensure Pages project exists
+        if: env.OUTCOME_READ_ONLY_RELEASE != 'true'
         continue-on-error: true
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
